@@ -1,0 +1,225 @@
+{
+  "type": "FeatureCollection",
+  "generator": "overpass-ide",
+  "copyright": "The data included in this document is from www.openstreetmap.org. The data is made available under ODbL.",
+  "timestamp": "2023-05-26T08:31:56Z",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "@id": "way/26145075",
+        "highway": "residential",
+        "lit": "yes",
+        "maxspeed": "30",
+        "maxspeed:type": "IT:zone30",
+        "name": "Vicolo Colombine",
+        "oneway": "yes",
+        "sidewalk": "none",
+        "smoothness": "intermediate",
+        "surface": "sett",
+        "width": "3.5"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            11.0077553,
+            45.4395716
+          ],
+          [
+            11.0078739,
+            45.4388792
+          ]
+        ]
+      },
+      "id": "way/26145075"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "@id": "way/27745405",
+        "busway": "opposite_lane",
+        "cycleway:right": "no",
+        "highway": "tertiary",
+        "lanes": "2",
+        "lanes:forward": "1",
+        "lanes:psv:backward": "1",
+        "lit": "yes",
+        "maxspeed": "30",
+        "maxspeed:type": "IT:zone30",
+        "name": "Via Venti Settembre",
+        "oneway": "yes",
+        "oneway:psv": "no",
+        "sidewalk": "both",
+        "surface": "asphalt"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            11.004117,
+            45.4390562
+          ],
+          [
+            11.0041949,
+            45.4390653
+          ],
+          [
+            11.0058142,
+            45.4393339
+          ],
+          [
+            11.0058375,
+            45.4393378
+          ],
+          [
+            11.0060886,
+            45.4393665
+          ],
+          [
+            11.0072913,
+            45.4395282
+          ],
+          [
+            11.0077553,
+            45.4395716
+          ],
+          [
+            11.0077934,
+            45.4395759
+          ],
+          [
+            11.0080208,
+            45.4396017
+          ],
+          [
+            11.0084704,
+            45.4396217
+          ],
+          [
+            11.0088174,
+            45.4396323
+          ],
+          [
+            11.0089207,
+            45.4396355
+          ],
+          [
+            11.0094109,
+            45.4396649
+          ],
+          [
+            11.0096915,
+            45.4396811
+          ],
+          [
+            11.0099361,
+            45.4397029
+          ],
+          [
+            11.0110688,
+            45.439812
+          ],
+          [
+            11.0110927,
+            45.4398147
+          ],
+          [
+            11.0113154,
+            45.4398374
+          ],
+          [
+            11.012413,
+            45.439975
+          ],
+          [
+            11.0125789,
+            45.4399685
+          ]
+        ]
+      },
+      "id": "way/27745405"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "@id": "way/92243374",
+        "foot": "permissive",
+        "highway": "residential",
+        "lit": "yes",
+        "maxspeed": "30",
+        "maxspeed:type": "IT:zone30",
+        "name": "Vicolo Lungo",
+        "oneway": "yes",
+        "sidewalk": "none",
+        "surface": "sett"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            11.0084704,
+            45.4396217
+          ],
+          [
+            11.0083577,
+            45.4405968
+          ]
+        ]
+      },
+      "id": "way/92243374"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "@id": "way/136890250",
+        "highway": "residential",
+        "lit": "yes",
+        "maxspeed": "30",
+        "maxspeed:type": "IT:zone30",
+        "name": "Vicolo Storto",
+        "oneway": "yes",
+        "sidewalk": "both",
+        "surface": "unhewn_cobblestone"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            11.0081049,
+            45.4405911
+          ],
+          [
+            11.0080735,
+            45.4403686
+          ],
+          [
+            11.0079625,
+            45.440334
+          ],
+          [
+            11.0078908,
+            45.4402853
+          ],
+          [
+            11.0078782,
+            45.4402471
+          ],
+          [
+            11.0078818,
+            45.4401976
+          ],
+          [
+            11.0079008,
+            45.4400962
+          ],
+          [
+            11.0080208,
+            45.4396017
+          ]
+        ]
+      },
+      "id": "way/136890250"
+    }
+  ]
+}

@@ -1,0 +1,44 @@
+{
+  "type": "FeatureCollection",
+  "generator": "overpass-ide",
+  "copyright": "The data included in this document is from www.openstreetmap.org. The data is made available under ODbL.",
+  "timestamp": "2023-05-24T14:13:53Z",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "@id": "way/138919852",
+        "building": "apartments",
+        "building:levels": "5"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              11.0077384,
+              45.4395164
+            ],
+            [
+              11.0076371,
+              45.439504
+            ],
+            [
+              11.0076513,
+              45.4393907
+            ],
+            [
+              11.0077557,
+              45.4393997
+            ],
+            [
+              11.0077384,
+              45.4395164
+            ]
+          ]
+        ]
+      },
+      "id": "way/138919852"
+    }
+  ]
+}
