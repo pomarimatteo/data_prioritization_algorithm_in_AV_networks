@@ -66,6 +66,7 @@ class Script:
     myself.print_car_info()
 
     Map_AV_updater(my_car_map, other_cars).show()
+    #util_vsb.show_visibility_graph_multiple_cars(my_car_map, other_cars, intersection)
 
 Script()
 

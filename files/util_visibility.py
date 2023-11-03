@@ -95,18 +95,10 @@ class Util_visibility():
 
         #adjusted_angle = angle
 
-        print('angle between ',my_car.ID,' and',other_car.ID,' ',adjusted_angle)
+        #print('angle between ',my_car.ID,' and',other_car.ID,' ',adjusted_angle)
 
         # Find the camera corresponding to the angle
-        '''
-        camera_directions = {
-            "East": (0, 45),
-            "North": (45, 135),
-            "West": (135, 225),
-            "South": (225, 315),
-            "East ": (315, 360),  
-        }
-        '''
+
 
         camera_directions = {
             "North": (0, 45),

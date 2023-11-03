@@ -3,6 +3,8 @@
 '''
 
 import matplotlib.pyplot as plt
+from shapely.geometry import Point, LineString
+
 
 from utility import Utility as util
 from util_visibility import Util_visibility as util_vsb
@@ -40,36 +42,41 @@ class New_AV_updater:
 
     #check visility static objects
     def check_visibility_SO(self):
-        buildings = self.my_car_map.get_buildings_geometry()
-        util_vsb.visibility_graph_other_car(self.car, self.other_car, buildings )
+        buildings = self.my_car_map.get_buildings()
+        my_car_pos = Point(self.car.lat, self.car.long)
+        other_car_pos = Point(self.other_car.lat, self.other_car.long)
 
-        return
-    
-    def get_camera(self):
-        #if (self.check_in_range):
-        camera = util_vsb.determine_camera(self.car, self.other_car)
-        return camera
+        return(util_vsb.is_visible(my_car_pos, other_car_pos, buildings ))
+        
+
         
     def final_camera(self):
         #if not self.check_in_range() or not self.#check_visibility_SO():
         #    return -1
-
-        return(self.get_camera())
+        camera = util_vsb.determine_camera(self.car, self.other_car)
+        return camera
     
+
+
     def add_car_camera_list(self):
         camera = self.final_camera()
-        if (camera != -1):
-            self.car.cars_in_range.append(self.other_car)
-            
-            if camera == "North" or camera == "North ":
-                self.car.visible_north.append(self.other_car)
-            elif camera == "South":
-                self.car.visible_south.append(self.other_car)
-            elif camera == "East":
-                self.car.visible_east.append(self.other_car)
-            elif camera == "West":
-                self.car.visible_west.append(self.other_car)
+        self.car.cars_in_range.append(self.other_car)
+        
+        if (self.check_visibility_SO()): 
 
             
-    
+            if (camera != -1):
+                
+                if camera == "North" or camera == "North ":
+                    self.car.visible_north.append(self.other_car)
+                elif camera == "South":
+                    self.car.visible_south.append(self.other_car)
+                elif camera == "East":
+                    self.car.visible_east.append(self.other_car)
+                elif camera == "West":
+                    self.car.visible_west.append(self.other_car)
+
+
+                
+        
 

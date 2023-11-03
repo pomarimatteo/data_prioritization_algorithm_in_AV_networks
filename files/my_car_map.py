@@ -68,8 +68,8 @@ class My_car_map:
     def get_buildings_geometry(self):
         return self.map.buildings['geometry']
     
+    def get_buildings(self):
+        return self.map.buildings
+    
     def get_roads_geometry(self):
         return self.map.roads['geometry']
-
-    
-            
