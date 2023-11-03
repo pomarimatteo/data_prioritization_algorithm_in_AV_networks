@@ -61,9 +61,8 @@ class New_AV_updater:
     def add_car_camera_list(self):
         camera = self.final_camera()
         self.car.cars_in_range.append(self.other_car)
-        
-        if (self.check_visibility_SO()): 
 
+        if (self.check_visibility_SO()): 
             
             if (camera != -1):
                 
@@ -75,8 +74,4 @@ class New_AV_updater:
                     self.car.visible_east.append(self.other_car)
                 elif camera == "West":
                     self.car.visible_west.append(self.other_car)
-
-
-                
-        
 
