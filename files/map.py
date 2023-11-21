@@ -1,4 +1,3 @@
-
 '''
 # this class takes GeoJSON files and displays a map with streets and buildings 
 # ensuring proper visualization using the draw_intersection function.  

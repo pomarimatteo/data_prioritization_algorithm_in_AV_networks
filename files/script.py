@@ -12,23 +12,19 @@ import geopandas as gpd
 
 class Script:
 
-    # generation local map
-    ##########################################
-    # generate myself
-    myself = Car('A', 11.007767285707814, 45.439492436628484, 90)
+    # Define file paths as variables
+    geojson_path = 'data/geojson/'
 
-    # import geojson files
-    intersection = gpd.read_file('data/intersection.geojson')
-    road = gpd.read_file('data/road.geojson')
-    map = (Map(intersection, road))
+    # Define GPS coordinates as variables
+    my_latitude = 11.007767285707814
 
-    # generate mymap
-    my_car_map = My_car_map(myself,map)
-    ##########################################
+    my_longitude = 45.439492436628484
+    my_orientation = 90
 
+    # Import geojson files
+    intersection = gpd.read_file(geojson_path + 'intersection.geojson')
+    road = gpd.read_file(geojson_path + 'road.geojson')
 
-
-    # Create other AV cars
     other_cars = []
     car_data = [
         ('B', 11.007789421555742, 45.43937903284822, 90),
@@ -36,17 +32,43 @@ class Script:
         ('D', 11.007484262837124, 45.43954676351245, 90),
         ('E', 11.008225211533869, 45.43960992760452, 90),
         ('F', 11.007983298078727, 45.439737059970014, 90)]
-
-
+    
+    # Create other AV cars
     for ID, x, y, orientation in car_data:
         other_cars.append(Car(ID, x, y, orientation))
 
+
+    
+
+    # GENERATE LOCAL MAP
+    ##########################################
+    # Generate myself
+    myself = Car('A', my_latitude, my_longitude, my_orientation)
+
+    # Generate map
+    map = Map(intersection, road)
+
+    # Generate my_car_map
+    my_car_map = My_car_map(myself,map)
+    ##########################################
+
     #util_vsb.show_visibility_graph_multiple_cars(myself, other_cars, intersection)
+
 
     event_1 = New_AV_updater(my_car_map, other_cars[0])
     #event_1.show()
-    event_1.add_car_camera_list()
+    event_1.process_detected_car()
+    event_1.show()
 
+
+
+
+
+
+
+
+    # add other AVs
+    '''
     event_2 = New_AV_updater(my_car_map, other_cars[1])
     #event_2.show()
     event_2.add_car_camera_list()
@@ -63,10 +85,16 @@ class Script:
     #event_5.show()
     event_5.add_car_camera_list()
 
+    '''
+
     myself.print_car_info()
 
-    Map_AV_updater(my_car_map, other_cars).show()
-    util_vsb.show_visibility_graph_multiple_cars(myself, other_cars, intersection)
+    #Map_AV_updater(my_car_map, other_cars).show()
+    #util_vsb.show_visibility_graph_multiple_cars(myself, other_cars, intersection)
+
+
+
+    # load 
 
 Script()
 

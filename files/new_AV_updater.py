@@ -19,6 +19,7 @@ class New_AV_updater:
     # private
     def generate_map(self):
         fig, ax = self.my_car_map.generate_intersection()
+
         # Plot in-range cars
         ax.plot(self.other_car.lat, self.other_car.long, 'ro')
         
@@ -48,24 +49,19 @@ class New_AV_updater:
 
         return(util_vsb.is_visible(my_car_pos, other_car_pos, buildings ))
         
-
-        
-    def final_camera(self):
+    def select_camera(self):
         #if not self.check_in_range() or not self.#check_visibility_SO():
         #    return -1
         camera = util_vsb.determine_camera(self.car, self.other_car)
         return camera
-    
 
-
-    def add_car_camera_list(self):
-        camera = self.final_camera()
+    def process_detected_car(self):
+        camera = self.select_camera()
         self.car.cars_in_range.append(self.other_car)
 
         if (self.check_visibility_SO()): 
             
-            if (camera != -1):
-                
+            if (camera != -1):   
                 if camera == "North" or camera == "North ":
                     self.car.visible_north.append(self.other_car)
                 elif camera == "South":

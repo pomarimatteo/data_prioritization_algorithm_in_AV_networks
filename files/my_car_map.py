@@ -15,13 +15,6 @@ class My_car_map:
         self.range = map.find_range_plot()
         #self.fig, self.ax = self.generate_intersection()
 
-    # not used
-    def draw(self):
-        # plot myself
-
-        self.ax.plot(self.car.lat, self.car.long, 'bo')
-        self.fig.show()
-        plt.show()
     
     # private
     def generate_intersection(self):

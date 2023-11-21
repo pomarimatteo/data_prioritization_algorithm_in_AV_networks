@@ -82,7 +82,6 @@ class Util_visibility():
             angle = math.degrees(math.atan2(delta_y, delta_x))
             return angle if angle >= 0 else angle + 360
     
-    #da qua
     def determine_camera(my_car, other_car):
         orientation = my_car.orientation
 
