@@ -1,0 +1,346 @@
+{
+    "back_sc_01.jpg270919": {
+      "filename": "back_sc_01.jpg",
+      "size": 270919,
+      "regions": [
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 444,
+            "y": 318,
+            "width": 155,
+            "height": 67
+          },
+          "region_attributes": {
+            "name": "car_1",
+            "type": "car"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 1091,
+            "y": 304,
+            "width": 185,
+            "height": 70
+          },
+          "region_attributes": {
+            "name": "car_2",
+            "type": "car"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 344,
+            "y": 295,
+            "width": 31,
+            "height": 114
+          },
+          "region_attributes": {
+            "name": "person_1",
+            "type": "person"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 297,
+            "y": 294,
+            "width": 44,
+            "height": 112
+          },
+          "region_attributes": {
+            "name": "person_2",
+            "type": "person"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 848,
+            "y": 303,
+            "width": 29,
+            "height": 58
+          },
+          "region_attributes": {
+            "name": "person_3",
+            "type": "person"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 1194,
+            "y": 295,
+            "width": 45,
+            "height": 104
+          },
+          "region_attributes": {
+            "name": "person_4",
+            "type": "person"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 1042,
+            "y": 309,
+            "width": 25,
+            "height": 48
+          },
+          "region_attributes": {
+            "name": "person_5",
+            "type": "person"
+          }
+        }
+      ],
+      "file_attributes": {
+        "caption": "",
+        "public_domain": "no",
+        "image_url": ""
+      }
+    },
+    "front_sc_01.jpg198509": {
+      "filename": "front_sc_01.jpg",
+      "size": 198509,
+      "regions": [
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 387,
+            "y": 377,
+            "width": 121,
+            "height": 75
+          },
+          "region_attributes": {
+            "name": "car_3",
+            "type": "car"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 514,
+            "y": 371,
+            "width": 48,
+            "height": 55
+          },
+          "region_attributes": {
+            "name": "car_4",
+            "type": "car"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 616,
+            "y": 366,
+            "width": 43,
+            "height": 87
+          },
+          "region_attributes": {
+            "name": "bicycle_1",
+            "type": "bicycle"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 131,
+            "y": 354,
+            "width": 46,
+            "height": 103
+          },
+          "region_attributes": {
+            "name": "person_6",
+            "type": "person"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 215,
+            "y": 352,
+            "width": 37,
+            "height": 96
+          },
+          "region_attributes": {
+            "name": "person_7",
+            "type": "person"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 342,
+            "y": 354,
+            "width": 31,
+            "height": 72
+          },
+          "region_attributes": {
+            "name": "person_8",
+            "type": "person"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 985,
+            "y": 339,
+            "width": 53,
+            "height": 158
+          },
+          "region_attributes": {
+            "name": "person_9",
+            "type": "person"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 914,
+            "y": 342,
+            "width": 54,
+            "height": 139
+          },
+          "region_attributes": {
+            "name": "person_10",
+            "type": "person"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 809,
+            "y": 364,
+            "width": 27,
+            "height": 72
+          },
+          "region_attributes": {
+            "name": "person_11",
+            "type": "person"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 763,
+            "y": 363,
+            "width": 32,
+            "height": 61
+          },
+          "region_attributes": {
+            "name": "person_12",
+            "type": "person"
+          }
+        }
+      ],
+      "file_attributes": {
+        "caption": "",
+        "public_domain": "no",
+        "image_url": ""
+      }
+    },
+    "left_sc_01.jpg288635": {
+      "filename": "left_sc_01.jpg",
+      "size": 288635,
+      "regions": [
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 104,
+            "y": 285,
+            "width": 55,
+            "height": 148
+          },
+          "region_attributes": {
+            "name": "person_13",
+            "type": "person"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 715,
+            "y": 281,
+            "width": 61,
+            "height": 152
+          },
+          "region_attributes": {
+            "name": "person_14",
+            "type": "person"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 1052,
+            "y": 285,
+            "width": 50,
+            "height": 158
+          },
+          "region_attributes": {
+            "name": "person_15",
+            "type": "person"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 1148,
+            "y": 283,
+            "width": 58,
+            "height": 152
+          },
+          "region_attributes": {
+            "name": "person_16",
+            "type": "person"
+          }
+        }
+      ],
+      "file_attributes": {
+        "caption": "",
+        "public_domain": "no",
+        "image_url": ""
+      }
+    },
+    "right_sc_01.jpg294472": {
+      "filename": "right_sc_01.jpg",
+      "size": 294472,
+      "regions": [
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 661,
+            "y": 251,
+            "width": 155,
+            "height": 308
+          },
+          "region_attributes": {
+            "name": "person_17",
+            "type": "person"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 1007,
+            "y": 303,
+            "width": 129,
+            "height": 57
+          },
+          "region_attributes": {
+            "name": "car_5",
+            "type": "car"
+          }
+        }
+      ],
+      "file_attributes": {
+        "caption": "",
+        "public_domain": "no",
+        "image_url": ""
+      }
+    }
+  }
+  
