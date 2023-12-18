@@ -4,9 +4,11 @@ from geopy.distance import geodesic
 import math
 
 class Utility:
-
+    @staticmethod
     def distance_meter(point_1, point_2):       
-        return geodesic(point_1, point_2).meters    
+        distance_in_meters = geodesic(point_1, point_2).meters
+        truncated_distance = round(distance_in_meters, 2)
+        return truncated_distance
 
     def format_distance(dist):
         if dist > 1000:

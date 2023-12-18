@@ -1,4 +1,4 @@
-from frames_file_handler import Frames_File_Handler
+from SELMA_frames_file_handler import FramesFileHandler
 from car import Car
 import os
 from PIL import Image
@@ -36,3 +36,4 @@ class Car_Frames:
             # Assegna l'immagine alla variabile corrispondente
             setattr(self, f"{direction}_image", image)
             print(f"Immagine {direction.capitalize()} caricata con successo da {filename}.")
+

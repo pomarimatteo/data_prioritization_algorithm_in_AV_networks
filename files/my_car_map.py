@@ -13,7 +13,17 @@ class My_car_map:
         self.car = car
         self.map = map
         self.range = map.find_range_plot()
+        self.cars_in_range = car.cars_in_range
+        
+        self.obs = []
+        
         #self.fig, self.ax = self.generate_intersection()
+        
+        
+    def add_obs(self,obs):
+        self.obs.append(obs)
+        
+        
 
     
     # private
@@ -32,8 +42,6 @@ class My_car_map:
         # extract boundaries
         xlim = [self.range[0][0], self.range[0][1]]
         ylim = [self.range[1][0], self.range[1][1]]
-
-
         
 
         plt.xlim(xlim)
@@ -46,6 +54,15 @@ class My_car_map:
         # plot myself
         ax.plot(self.car.lat, self.car.long, 'bo')
         
+        # plot cars_in_range
+        for other_car in self.cars_in_range:
+            ax.plot(other_car.lat, other_car.long, 'ro')
+            
+        #plot obstacles
+        for obs in self.obs:
+            ax.plot(obs.lat, obs.long, 'ro')
+        
+        
         return fig, ax
     
     def show(self):
@@ -54,9 +71,6 @@ class My_car_map:
 
     def get_car(self):
         return self.car
-    
-    def update_range(self, new_range):
-        self.range = self.new_range
 
     def get_buildings_geometry(self):
         return self.map.buildings['geometry']

@@ -73,6 +73,7 @@ class FramesFileHandler:
             plt.ylabel('Y-axis')
             plt.show()
             
+    # da controllare        
     def draw_rectangle_mask(self, image_id):
         regions = self.get_obstacle_regions(image_id)
         if regions:
@@ -93,12 +94,6 @@ class FramesFileHandler:
             plt.xlabel('X-axis')
             plt.ylabel('Y-axis')
             plt.show()
-
-
-
-
-
-
 
     def save_changes(self):
         with open(self.file_path, 'w') as file:
@@ -126,5 +121,22 @@ class FramesFileHandler:
             for object_type, object_names in type_groups.items():
                 print(f"{object_type} = {object_names}")
             print()
+            
+    def group_objects_by_type_dist(self):
+        grouped_by_type = {}
+        for image_id, obstacle_info in self.data.items():
+            type_groups = {}
+            for region in obstacle_info.get('regions', []):
+                object_type = region['region_attributes'].get('type')
+                object_name = region['region_attributes'].get('name')
+                object_distance = region['region_attributes'].get('distance')
+                if object_type and object_name and object_distance:
+                    if object_type not in type_groups:
+                        type_groups[object_type] = []
+                    type_groups[object_type].append((object_name, object_distance))
+
+            grouped_by_type[image_id] = type_groups
+
+        return grouped_by_type
 
 

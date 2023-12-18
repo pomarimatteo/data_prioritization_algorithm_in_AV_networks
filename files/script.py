@@ -3,6 +3,8 @@ from car import Car
 from my_car_map import My_car_map
 from map_AV_updater import Map_AV_updater
 from new_AV_updater import New_AV_updater
+from OBS import Obstacle
+from OBS_in_map import OBS_in_map
 
 
 from utility import Utility as util
@@ -33,12 +35,13 @@ class Script:
         ('E', 11.008225211533869, 45.43960992760452, 90),
         ('F', 11.007983298078727, 45.439737059970014, 90)]
     
+    obs_array = [Obstacle('obs001',11.007781900000000,45.439418600000000)]
+    
+    
     # Create other AV cars
     for ID, x, y, orientation in car_data:
         other_cars.append(Car(ID, x, y, orientation))
 
-
-    
 
     # GENERATE LOCAL MAP
     ##########################################
@@ -56,15 +59,21 @@ class Script:
 
 
     event_1 = New_AV_updater(my_car_map, other_cars[0])
-    #event_1.show()
     event_1.process_detected_car()
-    event_1.show()
-
-
-
-
-
-
+    
+    event_2 = New_AV_updater(my_car_map, other_cars[1])
+    event_2.process_detected_car()
+    
+    my_car_map.show()
+    
+    # OBSTACLES MANAGEMENT
+    
+    obs_event = OBS_in_map(my_car_map,obs_array[0])
+    print(obs_event.obs_in_LoS())
+    obs_event.print_cars_with_los()
+    
+    
+    
 
 
     # add other AVs
@@ -87,7 +96,7 @@ class Script:
 
     '''
 
-    myself.print_car_info()
+    #myself.print_car_info()
 
     #Map_AV_updater(my_car_map, other_cars).show()
     #util_vsb.show_visibility_graph_multiple_cars(myself, other_cars, intersection)

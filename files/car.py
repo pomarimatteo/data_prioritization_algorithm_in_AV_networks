@@ -1,3 +1,5 @@
+
+from AHP_score import AHP_score
 '''
 # This class represents a vehicle with its attributes 
 '''
@@ -11,12 +13,24 @@ class Car:
         self.orientation = orientation
 
         self.cars_in_range = []
-
+        
+        self.visible_obs = []
+        
+        self.obstacle_north = []
+        self.obstacle_east = []
+        self.obstacle_south = []
+        self.obstacle_west = []
+        
         self.visible_north = []
         self.visible_east = []
         self.visible_south = []
         self.visible_west = []
         
+        
+        
+        
+        
+    
     def get_cars_in_range(self):
         return self.cars_in_range
     
@@ -48,7 +62,45 @@ class Car:
 
     
     
+    ########################################################
+    # AHP_section
     
+    a = 9  # ('Novelty', 'Reliability')
+    b = 3  # ('Novelty', 'Distance')
+    c = 3  # ('Novelty', 'Content')
+    d = 1/6  # ('Reliability', 'Distance')
+    e = 1/8  # ('Reliability', 'Content')
+    f = 1  # ('Distance', 'Content')
+    
+    matrix = {
+        ('Novelty', 'Novelty'): 1,
+        ('Novelty', 'Reliability'): a,
+        ('Novelty', 'Distance'): b,
+        ('Novelty', 'Content'): c,
+
+        ('Reliability', 'Novelty'): 1/a,
+        ('Reliability', 'Reliability'): 1,
+        ('Reliability', 'Distance'): d,
+        ('Reliability', 'Content'): e,
+
+        ('Distance', 'Novelty'): 1/b,
+        ('Distance', 'Reliability'): 1/d,
+        ('Distance', 'Distance'): 1,
+        ('Distance', 'Content'): f,
+
+        ('Content', 'Novelty'): 1/c,
+        ('Content', 'Reliability'): 1/e,
+        ('Content', 'Distance'): 1/f,
+        ('Content', 'Content'): 1,
+    }
+    
+    # conditiona VOI
+    values = [
+        5, # proximity_relation_strength_value
+        5, # n_obstacles_value
+        5, #proximity_value
+        0.8
+    ] #accuracy_value
     
 
 
