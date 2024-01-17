@@ -26,10 +26,6 @@ class Car:
         self.visible_south = []
         self.visible_west = []
         
-        
-        
-        
-        
     
     def get_cars_in_range(self):
         return self.cars_in_range
@@ -59,12 +55,24 @@ class Car:
         print("east:", ", ".join(east_ids))
         print("south:", ", ".join(south_ids))
         print("west:", ", ".join(west_ids))
+        
+    def print_obstacle_ids(self):
+        print(f"Obstacle IDs for Car {self.ID}:")
+        print("North:", [obstacle.ID for obstacle in self.obstacle_north])
+        print("East:", [obstacle.ID for obstacle in self.obstacle_east])
+        print("South:", [obstacle.ID for obstacle in self.obstacle_south])
+        print("West:", [obstacle.ID for obstacle in self.obstacle_west])
+        
+    def print(self):
+        self.print_car_info()
+        self.print_obstacle_ids
+
 
     
     
     ########################################################
     # AHP_section
-    
+    '''
     a = 9  # ('Novelty', 'Reliability')
     b = 3  # ('Novelty', 'Distance')
     c = 3  # ('Novelty', 'Content')
@@ -101,7 +109,7 @@ class Car:
         5, #proximity_value
         0.8
     ] #accuracy_value
-    
+    '''    
 
 
 

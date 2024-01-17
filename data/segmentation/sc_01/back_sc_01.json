@@ -1,0 +1,119 @@
+{
+    "back_sc_01.jpg270919": {
+      "filename": "back_sc_01.jpg",
+      "size": 270919,
+      "regions": [
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 444,
+            "y": 318,
+            "width": 155,
+            "height": 67
+          },
+          "region_attributes": {
+            "name": "car_1",
+            "type": "car",
+            "distance": "30",
+            "accuracy": "0.8"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 1091,
+            "y": 304,
+            "width": 185,
+            "height": 70
+          },
+          "region_attributes": {
+            "name": "car_2",
+            "type": "car",
+            "distance": "50",
+            "accuracy": "0.8"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 344,
+            "y": 295,
+            "width": 31,
+            "height": 114
+          },
+          "region_attributes": {
+            "name": "person_1",
+            "type": "person",
+            "distance": "25",
+            "accuracy": "0.8"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 297,
+            "y": 294,
+            "width": 44,
+            "height": 112
+          },
+          "region_attributes": {
+            "name": "person_2",
+            "type": "person",
+            "distance": "24",
+            "accuracy": "0.8"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 848,
+            "y": 303,
+            "width": 29,
+            "height": 58
+          },
+          "region_attributes": {
+            "name": "person_3",
+            "type": "person",
+            "distance": "60",
+            "accuracy": "0.8"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 1194,
+            "y": 295,
+            "width": 45,
+            "height": 104
+          },
+          "region_attributes": {
+            "name": "person_4",
+            "type": "person",
+            "distance": "34",
+            "accuracy": "0.8"
+          }
+        },
+        {
+          "shape_attributes": {
+            "name": "rect",
+            "x": 1042,
+            "y": 309,
+            "width": 25,
+            "height": 48
+          },
+          "region_attributes": {
+            "name": "person_5",
+            "type": "person",
+            "distance": "65",
+            "accuracy": "0.8"
+          }
+        }
+      ],
+      "file_attributes": {
+        "caption": "",
+        "public_domain": "no",
+        "image_url": ""
+      }
+    }
+  }
+  

@@ -4,7 +4,7 @@ from AHP_functions import Functions as f
 
 class AHP_score():
     
-    print('AHP_score')
+    #print('AHP_score')
     # the score is calculated based on the given matrix and the paramater of each functions defined in 'Conditional_VOI' class
     
     
@@ -40,12 +40,14 @@ class AHP_score():
     
     ahp_calculator = AHP(matrix)
 
+    '''
     print(ahp_calculator.get_weights())
     print('\n')
     print(ahp_calculator.get_consistency_ratio())
     #ahp_calculator.print_report()
-    
+    print('check')
+    '''
     conditional_VOI = Conditional_VOI(ahp_calculator)
     values = [5,5,5,0.8]
-    print(conditional_VOI.calculate_importance_value(values))
+    #print(conditional_VOI.calculate_importance_value(values))
     

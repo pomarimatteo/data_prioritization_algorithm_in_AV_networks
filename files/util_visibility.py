@@ -9,6 +9,7 @@ from car import Car
 class Util_visibility():
 
     # if 2 car are visible to each other
+    @staticmethod  
     def is_visible(point1, point2, buildings):
         line = LineString([point1, point2])
 
@@ -124,8 +125,8 @@ class Util_visibility():
         # Display buildings
         buildings.plot(edgecolor='k', facecolor='none', alpha=0.7, figsize=(10, 10))
 
-        # Display your vehicle's point
-        plt.scatter(*my_car_pos.coords.xy, color='red', label='My Car', s=50, zorder=2)
+        # Display your vehicle's point with legend
+        plt.scatter(*my_car_pos.coords.xy, color='red', label=f'My Car ({my_car.ID})', s=50, zorder=2)
 
         # Calculate coordinates of line endpoints
         angles = list(range(45, 360, 90))
@@ -133,24 +134,24 @@ class Util_visibility():
 
         x1 = [my_car_pos.x + length * np.cos(np.radians(angle)) for angle in angles]
         y1 = [my_car_pos.y + length * np.sin(np.radians(angle)) for angle in angles]
-        
-        for i, angle in enumerate(angles):
-            plt.plot([my_car_pos.x, x1[i]], [my_car_pos.y, y1[i]], linestyle='-', zorder=1, color='black', alpha=0.5)  # Adjust the alpha value as needed
 
-        for other_car in other_cars:
+        for i, angle in enumerate(angles):
+            plt.plot([my_car_pos.x, x1[i]], [my_car_pos.y, y1[i]], linestyle='-', zorder=1, color='black', alpha=0.5)
+
+        for i, other_car in enumerate(other_cars):
             # Other vehicle's position
             other_car_pos = Point(other_car.lat, other_car.long)
 
-            # Display the other vehicle's point
-            plt.scatter(*other_car_pos.coords.xy, s=50, zorder=2)
+            # Display the other vehicle's point with legend
+            plt.scatter(*other_car_pos.coords.xy, label=f'Car {other_car.ID}', s=50, zorder=2)
 
             # Display the LineString between the points
-            line = LineString([my_car_pos, other_car_pos])  # Adding LineString definition
+            line = LineString([my_car_pos, other_car_pos])
             x, y = line.xy
             plt.plot(x, y, linestyle='--', zorder=1)
 
         # Graph configuration
-        #plt.legend()
+        plt.legend()
         plt.xlabel('Longitude')
         plt.ylabel('Latitude')
         plt.title('Intersection')
@@ -158,5 +159,3 @@ class Util_visibility():
 
         # Show the graph
         plt.show()
-
-

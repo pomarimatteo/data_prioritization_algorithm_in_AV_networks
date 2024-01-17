@@ -61,7 +61,7 @@ class Functions:
     @staticmethod
     def plot_n_obstacles_function(k, n_max):
         # Plot the object importance function
-        n_values = np.arange(0, 50, 1)
+        n_values = np.arange(0, 25, 1)
         importance_values = [Functions.n_obstacles_function(n, k, n_max) for n in n_values]
 
         plt.figure(figsize=(8, 6))
@@ -100,4 +100,9 @@ class Functions:
         plt.show()
 
 # usage
-
+'''
+Functions.plot_proximity_relation_strength(20,0.5)
+Functions.plot_n_obstacles_function(0.5,10)
+Functions.plot_proximity_function(50,0.5)
+Functions.plot_accuracy_function()
+'''

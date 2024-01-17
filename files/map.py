@@ -39,7 +39,7 @@ class Map:
         # plot streets
         for street in self.map.roads['geometry']:
             x, y = street.coords.xy
-            ax.plot(x, y, linewidth=3, color="grey")
+            ax.plot(x, y, linewidth=15, color="grey")
 
         # plot buildings
         for building in self.map.buildings['geometry']:

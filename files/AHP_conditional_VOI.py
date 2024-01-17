@@ -8,7 +8,7 @@ class Conditional_VOI:
         
     # for novelty i need the value of d 
     # x and k defined here
-    def proximity_relation_strength_value(self,dist):
+    def proximity_relation_strength_value(self,dist):                               
         d0_novelty = 20
         k_novelty = 0.5
         return f.proximity_relation_strength_function(dist, d0_novelty, k_novelty)

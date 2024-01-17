@@ -23,8 +23,6 @@ class My_car_map:
     def add_obs(self,obs):
         self.obs.append(obs)
         
-        
-
     
     # private
     def generate_intersection(self):
@@ -68,6 +66,13 @@ class My_car_map:
     def show(self):
         self.generate_intersection()
         plt.show()
+        
+    def is_point_in_range(self, point):
+        x, y = point.x, point.y
+        min_x, max_x = self.range[0][0], self.range[1][0]
+        min_y, max_y = self.range[0][1], self.range[1][1]
+
+        return min_x <= x <= max_x and min_y <= y <= max_y
 
     def get_car(self):
         return self.car
@@ -80,3 +85,5 @@ class My_car_map:
     
     def get_roads_geometry(self):
         return self.map.roads['geometry']
+    
+    

@@ -70,4 +70,20 @@ class New_AV_updater:
                     self.car.visible_east.append(self.other_car)
                 elif camera == "West":
                     self.car.visible_west.append(self.other_car)
+                    
+    def process_detected_obj(self):
+        camera = self.select_camera()
+        #self.car.cars_in_range.append(self.other_car)
+
+        if (self.check_visibility_SO()): 
+            
+            if (camera != -1):   
+                if camera == "North" or camera == "North ":
+                    self.car.obstacle_north.append(self.other_car)
+                elif camera == "South":
+                    self.car.obstacle_south.append(self.other_car)
+                elif camera == "East":
+                    self.car.obstacle_east.append(self.other_car)
+                elif camera == "West":
+                    self.car.obstacle_west.append(self.other_car)
 
