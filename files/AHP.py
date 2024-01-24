@@ -24,7 +24,7 @@ class AHP:
         priority_weights = principal_eigenvector / np.sum(principal_eigenvector)
         priority_weights = np.real_if_close(priority_weights)
         return priority_weights
-
+    
     
     # calcolo fatto da me utilizzando gli autovettori 
     '''

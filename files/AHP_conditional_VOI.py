@@ -53,7 +53,5 @@ class Conditional_VOI:
                             reliability_weight * accuracy_value)
 
         return importance_value
-        
-
-        
-        
+    
+    

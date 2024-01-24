@@ -86,8 +86,8 @@ class Test:
         
         # Stampare il risultato della funzione calculate_importance_value
         result = conditional_VOI.calculate_importance_value(values)
-        print("Risultato della funzione:", result)
-        print()
+        #print("Risultato della funzione:", result)
+        #print()
         
         # Aggiungere i valori alle liste
         i_values.append(i)
@@ -95,9 +95,9 @@ class Test:
 
     # Plot dell'andamento
     plt.plot(i_values, result_values, marker='o')
-    plt.title('Andamento del risultato della funzione')
-    plt.xlabel('Valore di i')
-    plt.ylabel('Risultato della funzione')
+    plt.title('Trend')
+    plt.xlabel('i value')
+    plt.ylabel('Results')
     plt.show()
     
 

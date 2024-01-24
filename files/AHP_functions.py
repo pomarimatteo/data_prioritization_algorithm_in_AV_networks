@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import math
+import os
 
 class Functions:
 
@@ -99,7 +100,32 @@ class Functions:
         plt.legend()
         plt.show()
 
+    def save_all_plots():
+        # Create a directory to save the plots
+        save_dir = 'data/functions'
+        os.makedirs(save_dir, exist_ok=True)
+
+        # Save the plot for proximity_relation_strength_function
+        Functions.plot_proximity_relation_strength(20, 0.5)
+        plt.savefig(os.path.join(save_dir, 'proximity_relation_strength_plot.png'))
+        plt.close()
+
+        # Save the plot for n_obstacles_function
+        Functions.plot_n_obstacles_function(0.5, 10)
+        plt.savefig(os.path.join(save_dir, 'n_obstacles_function_plot.png'))
+        plt.close()
+
+        # Save the plot for proximity_function
+        Functions.plot_proximity_function(50, 0.5)
+        plt.savefig(os.path.join(save_dir, 'proximity_function_plot.png'))
+        plt.close()
+
+        # Save the plot for accuracy_function
+        Functions.plot_accuracy_function()
+        plt.savefig(os.path.join(save_dir, 'accuracy_function_plot.png'))
+        plt.close()
 # usage
+
 '''
 Functions.plot_proximity_relation_strength(20,0.5)
 Functions.plot_n_obstacles_function(0.5,10)

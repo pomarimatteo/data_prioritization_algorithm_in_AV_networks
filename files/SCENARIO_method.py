@@ -14,7 +14,7 @@ from AHP import AHP
 from AHP_conditional_VOI import Conditional_VOI
 
 
-
+from tabulate import tabulate
 from shapely.geometry import Polygon
 import matplotlib.pyplot as plt
 from utility import Utility as util
@@ -36,7 +36,7 @@ class Simulated_Scenario:
      intersection = gpd.read_file(geojson_path + 'map_001.geojson')
      road = gpd.read_file(geojson_path + 'road.geojson')
      
-     n_obs = 10
+     n_obs = 5
      
      # Generate map
      map = Map(intersection, road)
@@ -55,18 +55,20 @@ class Simulated_Scenario:
           self.intersection
           self.road
           '''
-     # **************************************************** #
-
-     # SCENARIO_run_overview
+     
+     # BUILD SCENARIO
+     # **************************************************************************** #
+     
      def generate_all_AVs(self):
           array_AVs = []
           car_data = [
                ('A', 11.007767285707814, 45.439492436628484, 90),
                ('B', 11.007789421555742, 45.43937903284822, 90),
                ('C', 11.007903263242582, 45.439586043947855, 180),
-               ('D', 11.007484262837124, 45.43954676351245, 0),
+               ('D', 11.007484262837124, 45.43954676351245, 0.1),
                ('E', 11.008225211533869, 45.43960992760452, 180),
-               ('F', 11.007983298078727, 45.439737059970014, 270)]
+               ('F', 11.007983298078727, 45.439737059970014, 270)
+               ]
                
           for ID, x, y, orientation in car_data:
                array_AVs.append(Car(ID, x, y, orientation))
@@ -145,53 +147,8 @@ class Simulated_Scenario:
      def info_AV(self):
           for car in self.array_AVs:
                car.print()
-          
-     def to_json(self):
-        data = {
-            'AVs': [],
-            'Obstacles': [],
-            'CarsInRange': [],
-            'VisibleObs': [],
-            'ObstacleNorth': [],
-            'ObstacleEast': [],
-            'ObstacleSouth': [],
-            'ObstacleWest': [],
-            'VisibleNorth': [],
-            'VisibleEast': [],
-            'VisibleSouth': [],
-            'VisibleWest': []
-        }
-
-        for car_map in self.array_car_map:
-            car_data = {
-                'ID': car_map.car.ID,
-                'lat': car_map.car.lat,
-                'long': car_map.car.long,
-                'orientation': car_map.car.orientation,
-                'cars_in_range': [car.ID for car in car_map.car.cars_in_range],
-                'visible_obs': [obs.ID for obs in car_map.car.visible_obs],
-                'obstacle_north': [obs.ID for obs in car_map.car.obstacle_north],
-                'obstacle_east': [obs.ID for obs in car_map.car.obstacle_east],
-                'obstacle_south': [obs.ID for obs in car_map.car.obstacle_south],
-                'obstacle_west': [obs.ID for obs in car_map.car.obstacle_west],
-                'visible_north': [obs.ID for obs in car_map.car.visible_north],
-                'visible_east': [obs.ID for obs in car_map.car.visible_east],
-                'visible_south': [obs.ID for obs in car_map.car.visible_south],
-                'visible_west': [obs.ID for obs in car_map.car.visible_west]
-            }
-            data['AVs'].append(car_data)
-
-        for obs in self.obs_array:
-            obs_data = {
-                'ID': obs.ID,
-                'lat': obs.lat,
-                'long': obs.long
-            }
-            data['Obstacles'].append(obs_data)
-
-        with open('data/scenario_data.json', 'w') as json_file:
-            json.dump(data, json_file, indent=4)     
-               
+             
+     # IMPORTANT       
      def to_excel(self, excel_path='data/scenario_data.xlsx'):
           data = {
                'ID': [],
@@ -231,7 +188,6 @@ class Simulated_Scenario:
 
           df = pd.DataFrame(data)
           df.to_excel(excel_path, index=False)
-          print(f"Dati esportati correttamente in '{excel_path}'.")
 
      #potrebbe essere quello ottimale
      def generate_messages_to_send(self):
@@ -272,83 +228,138 @@ class Simulated_Scenario:
                         messages_to_send.append(message)
 
         return messages_to_send
-        
-     # broadcast scenario
-     def simulate_communication_broadcast(self):
+     
+     
+     # BROADCAST METHOD
+     # **************************************************************************** #
+     
+     def simulate_broadcast_communication(self):
           total_messages_sent = 0
-          # Dictionary to keep track of which obstacles are known to each vehicle in each direction
-          obstacles_known = {car.ID: {'north': set(), 'south': set(), 'east': set(), 'west': set()} for car in self.array_AVs}
+          messages_data = []
 
-          # Dictionary to count how many messages each vehicle sends
           messages_sent_count = {car.ID: 0 for car in self.array_AVs}
-
-          # Dictionary to count how many messages each vehicle receives
           messages_received_count = {car.ID: 0 for car in self.array_AVs}
 
-          for sender_car_map in self.array_car_map:
-               sender_id = sender_car_map.car.ID
+          for sender_car in self.array_AVs:
+               sender_id = sender_car.ID
 
-               for receiver_car_map in self.array_car_map:
-                    receiver_id = receiver_car_map.car.ID
+               for receiver_car in self.array_AVs:
+                    receiver_id = receiver_car.ID
+
+                    if sender_id != receiver_id:
+                         # Determine all images to send from sender to receiver
+                         messages_to_send, n_mex = self.determine_messages_to_send_broadcast(sender_car)
+
+                         if n_mex:
+                              messages_sent_count[sender_id] += n_mex
+                              messages_received_count[receiver_id] += n_mex
+                              total_messages_sent += n_mex
+
+                         if messages_to_send:
+                              messages_data.append({
+                              'Sender_ID': sender_id,
+                              'Receiver_ID': receiver_id,
+                              'Messages': messages_to_send
+                              })
+
+          # plot and save
+          self.plot_mex_counts(messages_sent_count, messages_received_count, 'data/mex_counts_broadcast.png')
+          self.save_AV_mex_count(messages_sent_count, messages_received_count, total_messages_sent, 'data/AV_mex_count_broadcast.xlsx')
+          self.save_content_communication(messages_data, 'data/content_communication_broadcast.xlsx')
+
+          print(f"Total messages sent during the broadcast simulation: {total_messages_sent}")
+               
+     # private     
+     def determine_messages_to_send_broadcast(self, sender_car):
+          messages_to_send = []
+          n_added_directions = 0
+
+          for direction in ['north', 'south', 'east', 'west']:
+               sender_obstacle_ids = {obs.ID: dist for obs, dist in sender_car.visible_obs}
+
+               n_added_directions += 1
+
+               unique_obstacles_tupla = [(obs.ID, dist) for obs, dist in sender_car.visible_obs if obs.ID in sender_obstacle_ids]
+
+               # Aggiungi gli ID e le distanze degli ostacoli alla direzione corrente
+               direction_data = {'direction': direction, 'obstacles': unique_obstacles_tupla}
+               messages_to_send.append(direction_data)
+
+          return messages_to_send, n_added_directions
+     
+     
+     # NAIVE METHOD
+     # **************************************************************************** #
+     # every AV checks the obstacles derected from the other. 
+     # It sends to everyone in need the info about their missing obs
+     
+     '''
+     * questo metodo considera l'invio delle info degli ostacoli che non sono visti dal ricevitore.
+     * se in una direzione ci sono più ostacoli di questo tipo vengono comunque conteggiati come singolo invio (dovuto dalla 
+     * direzione). Sarebbe possibile contare ogni singolo invio modidicando il conteggio con le seguenti:
+     * ' messages_sent_count[sender_id] += len(messages_to_send)
+     *   messages_received_count[receiver_id] += len(messages_to_send) '
+     *   e sistema 'total_messages_sent'
+     '''
+     
+     def simulate_naive_communication(self):
+          total_messages_sent = 0
+          messages_data = []
+
+          messages_sent_count = {car.ID: 0 for car in self.array_AVs}
+          messages_received_count = {car.ID: 0 for car in self.array_AVs}
+
+          for sender_car in self.array_AVs:
+               sender_id = sender_car.ID
+
+               for receiver_car in self.array_AVs:
+                    receiver_id = receiver_car.ID
 
                     if sender_id != receiver_id:
                          # Determine which obstacles the sender should send to the receiver in each direction
-                         messages_to_send = self.determine_messages_to_send(sender_car_map, receiver_car_map, obstacles_known)
-
-                         # Update the obstacles known by the receiver
-                         obstacles_known[receiver_id] = self.update_obstacles_known(receiver_car_map, messages_to_send, obstacles_known[receiver_id])
-
-                         # Increment the count of messages sent by the sender and received by the receiver
-                         messages_sent_count[sender_id] += len(messages_to_send)
-                         messages_received_count[receiver_id] += len(messages_to_send)
-
-                         total_messages_sent += len(messages_to_send)
-
-                         # Print information about the sent messages
+                         messages_to_send, n_mex = self.determine_messages_to_send_naive(sender_car, receiver_car)
+                                                                         
+                         if n_mex:
+                              messages_sent_count[sender_id] += n_mex
+                              messages_received_count[receiver_id] += n_mex
+                              total_messages_sent += n_mex
+                              
                          if messages_to_send:
-                              print(f"Car {sender_id} sends images to Car {receiver_id}:", messages_to_send)
-
-          # Print the total count of messages sent and received by each vehicle
-          for car_id in messages_sent_count.keys():
-               print(f"Car {car_id} sends {messages_sent_count[car_id]} messages and receives {messages_received_count[car_id]} messages.")
-
-          print(f"Total messages sent during the simulation: {total_messages_sent}")
-
-          self.plot_message_counts(messages_sent_count, messages_received_count)
-
-     def determine_messages_to_send(self, sender_car_map, receiver_car_map, obstacles_known):
+                              messages_data.append({
+                                   'Sender_ID': sender_id,
+                                   'Receiver_ID': receiver_id,
+                                   'Messages': messages_to_send
+                              })
+                              
+          # plot and save
+          self.plot_mex_counts(messages_sent_count, messages_received_count, 'data/mex_counts_naive.png')
+          self.save_AV_mex_count(messages_sent_count, messages_received_count, total_messages_sent, 'data/AV_mex_count_naive.xlsx')
+          self.save_content_communication(messages_data, 'data/content_communication_naive.xlsx')
+          
+          print(f"Total messages sent during the naive simulation: {total_messages_sent}")
+     
+     def determine_messages_to_send_naive(self, sender_car, receiver_car):
           messages_to_send = []
+          n_added_directions = 0
+
+          receiver_obstacle_ids = {obs.ID for obs, dist in receiver_car.visible_obs}
 
           for direction in ['north', 'south', 'east', 'west']:
-               obstacles_sender = getattr(sender_car_map.car, f'obstacle_{direction}')
-               obstacles_receiver_known = obstacles_known.get(receiver_car_map.car.ID, {}).get(direction, set())
+               sender_direction_obs_ids = {obs.ID for obs, dist in getattr(sender_car, f'obstacle_{direction}')}
+               unique_obstacle_ids = sender_direction_obs_ids - receiver_obstacle_ids
 
-               for obs_sender, dist_sender in obstacles_sender:
-                    if obs_sender.ID and obs_sender.ID not in obstacles_receiver_known:
-                         # Invia il messaggio se l'ostacolo non è noto al receiver in quella direzione
-                         messages_to_send.append({'direction': direction, 'obstacle': (obs_sender.ID, dist_sender)})
+               if unique_obstacle_ids:  # Check if there are unique obstacles for the current direction
+                    n_added_directions += 1
 
-          return messages_to_send
+                    unique_obstacles_tupla = [(obs.ID, dist) for obs, dist in getattr(sender_car, f'obstacle_{direction}') if obs.ID in unique_obstacle_ids]
+
+                    direction_data = {'direction': direction, 'obstacles': unique_obstacles_tupla}
+                    messages_to_send.append(direction_data)
+
+          return messages_to_send, n_added_directions
      
-     def update_obstacles_known(self, receiver_car_map, messages_to_send, obstacles_known):
-          receiver_id = receiver_car_map.car.ID
-          updated_obstacles_known = obstacles_known.get(receiver_id, {}).copy()
-
-          for message in messages_to_send:
-               direction = message['direction']
-               obstacle_id = message['obstacle'][0]
-
-               # Assicurati che la chiave della direzione esista nel dizionario
-               if direction not in updated_obstacles_known:
-                    updated_obstacles_known[direction] = set()
-
-               updated_obstacles_known[direction].add(obstacle_id)
-
-          obstacles_known[receiver_id] = updated_obstacles_known  # Aggiorna il dizionario originale
-
-          return updated_obstacles_known
-
-     def plot_message_counts(self, sent_count, received_count, save_path='data/n_mex.png'):
+     # png
+     def plot_mex_counts(self, sent_count, received_count, save_path='data/mex_counts.png'):
           # Extract data for the plot
           cars = list(sent_count.keys())
           sent_messages = list(sent_count.values())
@@ -381,63 +392,329 @@ class Simulated_Scenario:
           # Display the plot
           plt.savefig(save_path)
           plt.show()
-          
-     print ('#######################################################\n')
      
+     # to exel
+     def save_AV_mex_count(self, messages_sent_count, messages_received_count, total_messages_sent, filename = 'data/AV_mex_count.xlsx'):
+          # Create a DataFrame with the data to be saved
+          data = [{'Car_ID': car_id, 'Messages_Sent': sent_count, 'Messages_Received': received_count}
+                    for car_id, sent_count, received_count in zip(messages_sent_count.keys(),
+                                                                 messages_sent_count.values(),
+                                                                 messages_received_count.values())]
+
+          # Add a row for the total messages
+          total_data = {'Car_ID': 'Total', 'Messages_Sent': total_messages_sent, 'Messages_Received': total_messages_sent}
+          data.append(total_data)
+
+          df = pd.DataFrame(data)
+
+          # Save the DataFrame to an Excel file
+          
+          df.to_excel(filename, index=False)
+          
+     # to exel
+     def save_content_communication(self, messages_data, filename='data/content_communication.xlsx'):
+        messages_df = pd.DataFrame(messages_data)
+        messages_df.to_excel(filename, index=False)
+     
+     
+     # MY METHOD
+     # **************************************************************************** #
+
+
+
+
+
+
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     '''
+     def simulate_optimized_communication(self):
+          total_messages_sent = 0
+          messages_data = []
+
+          messages_sent_count = {car.ID: 0 for car in self.array_AVs}
+          messages_received_count = {car.ID: 0 for car in self.array_AVs}
+          
+          # Trova l'ostacolo con la distanza massima tra tutti gli ostacoli
+          max_distance_obstacle, max_distance = max(((obs, dist) for car in self.array_AVs for obs, dist in car.visible_obs), key=lambda x: x[1])
+
+          for sender_car in self.array_AVs:
+               sender_id = sender_car.ID
+
+               for receiver_car in self.array_AVs:
+                    receiver_id = receiver_car.ID
+
+                    if sender_id != receiver_id:
+                         # Verifica se il ricevitore non è a conoscenza dell'ostacolo con la distanza massima
+                         receiver_obstacle_ids = {obs.ID for obs, dist in receiver_car.visible_obs}
+                         if max_distance_obstacle.ID not in receiver_obstacle_ids:
+                              # Invia un messaggio al ricevitore sull'ostacolo con la distanza massima
+                              direction_data = {'direction': 'max_distance', 'obstacles': [(max_distance_obstacle.ID, max_distance)]}
+                              messages_to_send = [direction_data]
+
+                              messages_sent_count[sender_id] += 1
+                              messages_received_count[receiver_id] += 1
+                              total_messages_sent += 1
+
+                              messages_data.append({
+                              'Sender_ID': sender_id,
+                              'Receiver_ID': receiver_id,
+                              'Messages': messages_to_send
+                              })
+
+          # plot and save
+          self.plot_mex_counts(messages_sent_count, messages_received_count, 'data/mex_counts_optimized.png')
+          self.save_AV_mex_count(messages_sent_count, messages_received_count, total_messages_sent, 'data/AV_mex_count_optimized.xlsx')
+          self.save_content_communication(messages_data, 'data/content_communication_optimized.xlsx')
+
+          print(f"Total messages sent during the optimized simulation: {total_messages_sent}")
+
+
+     def simulate_optimized_communication_min(self):
+          total_messages_sent = 0
+          messages_data = []
+
+          messages_sent_count = {car.ID: 0 for car in self.array_AVs}
+          messages_received_count = {car.ID: 0 for car in self.array_AVs}
+
+          # Trova l'ostacolo con la distanza massima tra tutti gli ostacoli
+          min_distance_obstacle, min_distance = min((obs for car in self.array_AVs for obs in car.visible_obs), key=lambda x: x[1])
+
+          for sender_car in self.array_AVs:
+               sender_id = sender_car.ID
+
+               for receiver_car in self.array_AVs:
+                    receiver_id = receiver_car.ID
+
+                    if sender_id != receiver_id:
+                         # Verifica se il ricevitore non è a conoscenza dell'ostacolo con la distanza massima
+                         receiver_obstacles = {obs for obs, dist in receiver_car.visible_obs}
+                         if min_distance_obstacle not in receiver_obstacles:
+                              # Invia un messaggio al ricevitore sull'ostacolo con la distanza massima
+                              direction_data = {'direction': 'max_distance', 'obstacles': [(min_distance_obstacle, min_distance)]}
+                              messages_to_send = [direction_data]
+
+                              messages_sent_count[sender_id] += 1
+                              messages_received_count[receiver_id] += 1
+                              total_messages_sent += 1
+
+                              messages_data.append({
+                              'Sender_ID': sender_id,
+                              'Receiver_ID': receiver_id,
+                              'Messages': messages_to_send
+                              })
+
+          # plot and save
+          self.plot_mex_counts(messages_sent_count, messages_received_count, 'data/mex_counts_optimized.png')
+          self.save_AV_mex_count(messages_sent_count, messages_received_count, total_messages_sent, 'data/AV_mex_count_optimized.xlsx')
+          self.save_content_communication(messages_data, 'data/content_communication_optimized.xlsx')
+
+          print(f"Total messages sent during the optimized simulation: {total_messages_sent}")
+
+     
+     
+
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     # **************************************************************************** #
+
+
+     def simulate_optimized_communication_original(self):
+          
+          total_messages_sent = 0
+          obstacles_known = {car.ID: {'north': set(), 'south': set(), 'east': set(), 'west': set()} for car in self.array_AVs}
+          messages_sent_count = {car.ID: 0 for car in self.array_AVs}
+          messages_received_count = {car.ID: 0 for car in self.array_AVs}
+
+          for sender_car in self.array_AVs:
+               sender_id = sender_car.ID
+
+               for receiver_car in self.array_AVs:
+                    receiver_id = receiver_car.ID
+
+                    if sender_id != receiver_id:
+                         messages_to_send = self.determine_messages_to_send_uni(sender_car, receiver_car, obstacles_known)
+
+                         obstacles_known[receiver_id] = self.update_obstacles_known_uni(receiver_car, messages_to_send,obstacles_known[receiver_id])
+
+                         messages_sent_count[sender_id] += len(messages_to_send)
+                         messages_received_count[receiver_id] += len(messages_to_send)
+
+                         total_messages_sent += len(messages_to_send)
+
+                         if messages_to_send:
+                              print(f"Car {sender_id} sends images to Car {receiver_id}:", messages_to_send)
+
+          for car_id in messages_sent_count.keys():
+               print(f"Car {car_id} sends {messages_sent_count[car_id]} messages and receives {messages_received_count[car_id]} messages.")
+
+          print(f"Total messages sent during the simulation: {total_messages_sent}")
+
+          self.plot_message_counts(messages_sent_count, messages_received_count,'data/n_mex_uni.png')
+
+     def simulate_optimized_communication(self):
+          total_messages_sent = 0
+          obstacles_known = {car.ID: {'north': set(), 'south': set(), 'east': set(), 'west': set()} for car in self.array_AVs}
+          messages_sent_count = {car.ID: 0 for car in self.array_AVs}
+          messages_received_count = {car.ID: 0 for car in self.array_AVs}
+          messages_data = []  # Assuming this list will be used to store communication data, adjust as needed
+
+          for sender_car in self.array_AVs:
+               sender_id = sender_car.ID
+
+               for receiver_car in self.array_AVs:
+                    receiver_id = receiver_car.ID
+
+                    if sender_id != receiver_id:
+                         messages_to_send = self.determine_messages_to_send_uni(sender_car, receiver_car, obstacles_known)
+
+                         obstacles_known[receiver_id] = self.update_obstacles_known_uni(receiver_car, messages_to_send,
+                                                                                     obstacles_known[receiver_id])
+
+                         messages_sent_count[sender_id] += len(messages_to_send)
+                         messages_received_count[receiver_id] += len(messages_to_send)
+
+                         total_messages_sent += len(messages_to_send)
+
+                         if messages_to_send:
+                              #print(f"Car {sender_id} sends images to Car {receiver_id}:", messages_to_send)
+                              messages_data.append({'sender': sender_id, 'receiver': receiver_id, 'messages': messages_to_send})
+
+
+
+
+          # Additional method calls
+          self.plot_mex_counts(messages_sent_count, messages_received_count, 'data/mex_counts_optimized.png')
+          self.save_AV_mex_count(messages_sent_count, messages_received_count, total_messages_sent, 'data/AV_mex_count_optimized.xlsx')
+          self.save_content_communication(messages_data, 'data/content_communication_optimized.xlsx')
+
+          print(f"Total messages sent during the optimized simulation: {total_messages_sent}")
+
+     def determine_messages_to_send_uni(self, sender_car, receiver_car, obstacles_known):
+          messages_to_send = []
+
+          for direction in ['north', 'south', 'east', 'west']:
+               obstacles_sender = getattr(sender_car, f'obstacle_{direction}')
+               obstacles_receiver_known = obstacles_known.get(receiver_car.ID, {}).get(direction, set())
+
+               max_distance_obstacle = max(obstacles_sender, key=lambda x: x[1], default=None)
+
+               if max_distance_obstacle is not None:
+                    obs_sender, dist_sender = max_distance_obstacle
+
+                    if obs_sender.ID and obs_sender.ID not in obstacles_receiver_known:
+                         messages_to_send.append({'direction': direction, 'obstacle': (obs_sender.ID, dist_sender)})
+
+          return messages_to_send
+
+     def update_obstacles_known_uni(self, receiver_car, messages_to_send, obstacles_known):
+          receiver_id = receiver_car.ID
+          updated_obstacles_known = obstacles_known.get(receiver_id, {}).copy()
+
+          for message in messages_to_send:
+               direction = message['direction']
+               obstacle_id = message['obstacle'][0]
+
+               if direction not in updated_obstacles_known:
+                    updated_obstacles_known[direction] = set()
+
+               updated_obstacles_known[direction].add(obstacle_id)
+
+          obstacles_known[receiver_id] = updated_obstacles_known
+
+          return updated_obstacles_known
+     
+     
+     '''
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+       
+     # only plot    
      def evaluate_obstacles_visibility(self):
-        for car_map_A in self.array_car_map:
-            car_A = car_map_A.car
-            obstacles_info_A = []
+          for car_A in self.array_AVs:
+               obstacles_info_A = []
+               
+               for car_B in self.array_AVs:
 
-            for car_map_B in self.array_car_map:
-                car_B = car_map_B.car
+                    if car_A != car_B:
+                         obstacles_visible_to_A = set(obs.ID for obs, _ in car_A.visible_obs)
+                         obstacles_visible_to_B = set(obs.ID for obs, _ in car_B.visible_obs)
 
-                if car_A != car_B:
-                    obstacles_visible_to_A = set(obs.ID for obs, _ in car_A.visible_obs)
-                    obstacles_visible_to_B = set(obs.ID for obs, _ in car_B.visible_obs)
+                         obstacles_only_visible_to_A = obstacles_visible_to_A - obstacles_visible_to_B
 
-                    obstacles_only_visible_to_A = obstacles_visible_to_A - obstacles_visible_to_B
+                         if obstacles_only_visible_to_A:
+                              obstacles_info_A.append(f"Car {car_A.ID} sees obstacles that {car_B.ID} does not: {obstacles_only_visible_to_A}")
 
-                    if obstacles_only_visible_to_A:
-                        obstacles_info_A.append(f"Car {car_A.ID} vede ostacoli che Car {car_B.ID} non vede: {obstacles_only_visible_to_A}")
+               if obstacles_info_A:
+                    print("\n".join(obstacles_info_A))
+     
+     # generate table terminal and 'visibility_table' 
+     def evaluate_obstacles_visibility_table(self):
+          av_ids = [car.ID for car in self.array_AVs]
+          visibility_table = []
 
-            if obstacles_info_A:
-                print("\n".join(obstacles_info_A))
-                
-     def evaluate_obstacles_visibility_plot(self, save_path='data/obstacles_visibility_plot.png'):
-        vehicles = [car_map.car.ID for car_map in self.array_car_map]
-        data = {vehicle: [0] * len(self.array_car_map) for vehicle in vehicles}
+          for car_A in self.array_AVs:
+               obstacles_info_A = []
 
-        for i, car_map_A in enumerate(self.array_car_map):
-            car_A = car_map_A.car
+               for car_B in self.array_AVs:
+                    if car_A != car_B:
+                         obstacles_visible_to_A = set(obs.ID for obs, _ in car_A.visible_obs)
+                         obstacles_visible_to_B = set(obs.ID for obs, _ in car_B.visible_obs)
 
-            for j, car_map_B in enumerate(self.array_car_map):
-                car_B = car_map_B.car
+                         obstacles_only_visible_to_A = obstacles_visible_to_A - obstacles_visible_to_B
 
-                if car_A != car_B:
-                    obstacles_visible_to_A = set(obs.ID for obs, _ in car_A.visible_obs)
-                    obstacles_visible_to_B = set(obs.ID for obs, _ in car_B.visible_obs)
+                         if obstacles_only_visible_to_A:
+                              obstacles_info_A.append((car_B.ID, len(obstacles_only_visible_to_A)))
 
-                    obstacles_only_visible_to_A = obstacles_visible_to_A - obstacles_visible_to_B
-                    data[car_A.ID][j] = len(obstacles_only_visible_to_A)
+               row = [car_A.ID] + [0] * len(av_ids)
+               for av_B, num_obstacles in obstacles_info_A:
+                    index_B = av_ids.index(av_B) + 1
+                    row[index_B] = num_obstacles
 
-        df = pd.DataFrame(data, index=vehicles)
+               visibility_table.append(row)
 
-        # Utilizza seaborn per migliorare la visualizzazione
-        sns.set(font_scale=1)
-        plt.figure(figsize=(8, 6))
-        cmap = sns.light_palette("orange", as_cmap=True)
-        sns.heatmap(df, annot=True, cmap=cmap, fmt="d", linewidths=.5, cbar_kws={'label': 'Number of obstacles'},
-                    square=True, annot_kws={"size": 8}, xticklabels=vehicles, yticklabels=vehicles, cbar=True)
-        plt.title("Number of obstacles not seen by each vehicle relative to others")
-        plt.xticks(rotation=0, ha="center")
-        plt.yticks(rotation=0, va="center")
-        plt.tight_layout()
-
-        # Salva l'immagine
-        plt.savefig(save_path)
-        plt.show()
-        
+          return av_ids, visibility_table
+     
+     #plot tabular table
+     def print_tabular_table(self):
+          
+          av_ids, visibility_table = self.evaluate_obstacles_visibility_table()
+          table_header = [''] + av_ids
+          print(tabulate(visibility_table, headers=table_header, tablefmt='grid'))
+          
      def evaluate_obstacles_visibility_dir(self):
         for car_map_A in self.array_car_map:
             car_A = car_map_A.car
@@ -537,73 +814,45 @@ class Simulated_Scenario:
 
         # Mostrare il plot
         plt.show()
-        
-     def simulate_communication_uni(self):
-          total_messages_sent = 0
-          obstacles_known = {car.ID: {'north': set(), 'south': set(), 'east': set(), 'west': set()} for car in self.array_AVs}
-          messages_sent_count = {car.ID: 0 for car in self.array_AVs}
-          messages_received_count = {car.ID: 0 for car in self.array_AVs}
+     
+     
+     
+      
 
-          for sender_car_map in self.array_car_map:
-               sender_id = sender_car_map.car.ID
+     # useless          
+     def plot_sns_obs(self, save_path='data/obstacles_visibility_plot.png'):
+          vehicles = [car_map.car.ID for car_map in self.array_car_map]
+          data = {vehicle: [0] * len(self.array_car_map) for vehicle in vehicles}
 
-               for receiver_car_map in self.array_car_map:
-                    receiver_id = receiver_car_map.car.ID
+          for i, car_A in enumerate(self.array_AVs):
 
-                    if sender_id != receiver_id:
-                         messages_to_send = self.determine_messages_to_send_uni(sender_car_map, receiver_car_map, obstacles_known)
+               for j, car_map_B in enumerate(self.array_car_map):
+                    car_B = car_map_B.car
 
-                         obstacles_known[receiver_id] = self.update_obstacles_known_uni(receiver_car_map, messages_to_send,
-                                                                                     obstacles_known[receiver_id])
+                    if car_A != car_B:
+                         obstacles_visible_to_A = set(obs.ID for obs, _ in car_A.visible_obs)
+                         obstacles_visible_to_B = set(obs.ID for obs, _ in car_B.visible_obs)
 
-                         messages_sent_count[sender_id] += len(messages_to_send)
-                         messages_received_count[receiver_id] += len(messages_to_send)
+                         obstacles_only_visible_to_A = obstacles_visible_to_A - obstacles_visible_to_B
+                         data[car_A.ID][j] = len(obstacles_only_visible_to_A)
 
-                         total_messages_sent += len(messages_to_send)
+          df = pd.DataFrame(data, index=self.array_AVs)
 
-                         if messages_to_send:
-                              print(f"Car {sender_id} sends images to Car {receiver_id}:", messages_to_send)
+          # Utilizza seaborn per migliorare la visualizzazione
+          sns.set(font_scale=1)
+          plt.figure(figsize=(8, 6))
+          cmap = sns.light_palette("orange", as_cmap=True)
+          sns.heatmap(df, annot=True, cmap=cmap, fmt="d", linewidths=.5, cbar_kws={'label': 'Number of obstacles'},
+                         square=True, annot_kws={"size": 8}, xticklabels=vehicles, yticklabels=vehicles, cbar=True)
+          plt.title("Number of obstacles not seen by each vehicle relative to others")
+          plt.xticks(rotation=0, ha="center")
+          plt.yticks(rotation=0, va="center")
+          plt.tight_layout()
 
-          for car_id in messages_sent_count.keys():
-               print(f"Car {car_id} sends {messages_sent_count[car_id]} messages and receives {messages_received_count[car_id]} messages.")
-
-          print(f"Total messages sent during the simulation: {total_messages_sent}")
-
-          self.plot_message_counts(messages_sent_count, messages_received_count,'data/n_mex_uni.png')
-
-     def determine_messages_to_send_uni(self, sender_car_map, receiver_car_map, obstacles_known):
-          messages_to_send = []
-
-          for direction in ['north', 'south', 'east', 'west']:
-               obstacles_sender = getattr(sender_car_map.car, f'obstacle_{direction}')
-               obstacles_receiver_known = obstacles_known.get(receiver_car_map.car.ID, {}).get(direction, set())
-
-               max_distance_obstacle = max(obstacles_sender, key=lambda x: x[1], default=None)
-
-               if max_distance_obstacle is not None:
-                    obs_sender, dist_sender = max_distance_obstacle
-
-                    if obs_sender.ID and obs_sender.ID not in obstacles_receiver_known:
-                         messages_to_send.append({'direction': direction, 'obstacle': (obs_sender.ID, dist_sender)})
-
-          return messages_to_send
-
-     def update_obstacles_known_uni(self, receiver_car_map, messages_to_send, obstacles_known):
-          receiver_id = receiver_car_map.car.ID
-          updated_obstacles_known = obstacles_known.get(receiver_id, {}).copy()
-
-          for message in messages_to_send:
-               direction = message['direction']
-               obstacle_id = message['obstacle'][0]
-
-               if direction not in updated_obstacles_known:
-                    updated_obstacles_known[direction] = set()
-
-               updated_obstacles_known[direction].add(obstacle_id)
-
-          obstacles_known[receiver_id] = updated_obstacles_known
-
-          return updated_obstacles_known
+          # Salva l'immagine
+          plt.savefig(save_path)
+          plt.show()
+     
      
      def voi(self):
           a = 9  # ('Novelty', 'Reliability')

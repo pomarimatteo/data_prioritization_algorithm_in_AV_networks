@@ -13,6 +13,11 @@ class Car:
         self.orientation = orientation
 
         self.cars_in_range = []
+            
+        self.visible_north = []
+        self.visible_east = []
+        self.visible_south = []
+        self.visible_west = []
         
         self.visible_obs = []
         
@@ -21,11 +26,8 @@ class Car:
         self.obstacle_south = []
         self.obstacle_west = []
         
-        self.visible_north = []
-        self.visible_east = []
-        self.visible_south = []
-        self.visible_west = []
-        
+    def get_visible_obs(self):
+        return self.visible_obs
     
     def get_cars_in_range(self):
         return self.cars_in_range
@@ -56,18 +58,6 @@ class Car:
         print("south:", ", ".join(south_ids))
         print("west:", ", ".join(west_ids))
         
-    def print_obstacle_ids(self):
-        print(f"Obstacle IDs for Car {self.ID}:")
-        print("North:", [obstacle.ID for obstacle in self.obstacle_north])
-        print("East:", [obstacle.ID for obstacle in self.obstacle_east])
-        print("South:", [obstacle.ID for obstacle in self.obstacle_south])
-        print("West:", [obstacle.ID for obstacle in self.obstacle_west])
-        
-    def print(self):
-        self.print_car_info()
-        self.print_obstacle_ids
-
-
     
     
     ########################################################

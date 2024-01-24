@@ -33,9 +33,9 @@ class New_AV_updater:
         coord_p2 = (self.other_car.lat, self.other_car.long)
 
         dist_in_meters = util.distance_meter(coord_p1, coord_p2)
-        formatted_distance = util.format_distance(dist_in_meters)
+        #formatted_distance = float(util.format_distance(dist_in_meters))
         
-        return formatted_distance
+        return dist_in_meters
     
     def check_in_range(self):
         if (util.check_in_range(self.my_car_map, self.other_car)):
@@ -56,34 +56,21 @@ class New_AV_updater:
         return camera
 
     def process_detected_car(self):
-        camera = self.select_camera()
-        self.car.cars_in_range.append(self.other_car)
-
-        if (self.check_visibility_SO()): 
+        dist = self.calculate_distance()
+        tupla = (self.other_car,dist) 
+        if(dist < 1000):
+            self.car.cars_in_range.append(tupla)
             
-            if (camera != -1):   
-                if camera == "North" or camera == "North ":
-                    self.car.visible_north.append(self.other_car)
-                elif camera == "South":
-                    self.car.visible_south.append(self.other_car)
-                elif camera == "East":
-                    self.car.visible_east.append(self.other_car)
-                elif camera == "West":
-                    self.car.visible_west.append(self.other_car)
+            if (self.check_visibility_SO()): 
+                camera = self.select_camera()                
                     
-    def process_detected_obj(self):
-        camera = self.select_camera()
-        #self.car.cars_in_range.append(self.other_car)
-
-        if (self.check_visibility_SO()): 
-            
-            if (camera != -1):   
-                if camera == "North" or camera == "North ":
-                    self.car.obstacle_north.append(self.other_car)
-                elif camera == "South":
-                    self.car.obstacle_south.append(self.other_car)
-                elif camera == "East":
-                    self.car.obstacle_east.append(self.other_car)
-                elif camera == "West":
-                    self.car.obstacle_west.append(self.other_car)
-
+                if (camera != -1):   
+                    if camera == "North" or camera == "North ":
+                        self.car.visible_north.append(tupla)
+                    elif camera == "South":
+                        self.car.visible_south.append(tupla)
+                    elif camera == "East":
+                        self.car.visible_east.append(tupla)
+                    elif camera == "West":
+                        self.car.visible_west.append(tupla)
+                    

@@ -1,8 +1,10 @@
 import geopandas as gpd
+import pandas as pd
 from shapely.geometry import Point, LineString
 import matplotlib.pyplot as plt
 import numpy as np
 import math
+import os
 
 from car import Car
 
@@ -105,7 +107,7 @@ class Util_visibility():
             "West": (45, 135),
             "South": (135, 225),
             "East": (225, 315),
-            "North ": (315, 360),  
+            "North ": (315, 360)  
         }
         
         for camera, (start, end) in camera_directions.items():
@@ -158,4 +160,87 @@ class Util_visibility():
         plt.axis('equal')
 
         # Show the graph
+        plt.show()
+        
+    @staticmethod
+    def test(AV_array, obs_array, buildings):
+        # Your vehicle's position
+        my_car = AV_array[0]
+        my_car_pos = Point(my_car.lat, my_car.long)
+
+        # Display buildings
+        buildings.plot(edgecolor='k', facecolor='none', alpha=0.7, figsize=(10, 10))
+
+        # Display your vehicle's point
+        plt.scatter(*my_car_pos.coords.xy, color='red', label=f'My Car ({my_car.ID})', s=50, zorder=2)
+
+        for i, other_car in enumerate(AV_array[1:]):
+            # Other vehicle's position
+            other_car_pos = Point(other_car.lat, other_car.long)
+
+            # Display the other vehicle's point
+            plt.scatter(*other_car_pos.coords.xy, label=f'Car {other_car.ID}', s=50, zorder=2)
+
+        # Plot obstacles from obs_array
+        for obstacle in obs_array:
+            obstacle_pos = Point(obstacle.lat, obstacle.long)
+            plt.scatter(*obstacle_pos.coords.xy, label=f'Obstacle {obstacle.ID}', marker='x', s=50, zorder=2)
+
+        # Graph configuration
+        plt.xlabel('Longitude')
+        plt.ylabel('Latitude')
+        plt.title('Intersection')
+        plt.axis('equal')
+
+        # Create a separate legend window
+        legend = plt.legend(loc='upper left', bbox_to_anchor=(1, 1))
+        legend.get_frame().set_facecolor('white')
+        
+        # Adjust subplot to make room for the legend
+        plt.subplots_adjust(right=0.8)
+
+        # Show the graph
+        plt.show()
+        
+    def save_test(AV_array, obs_array, buildings, save_path='data/intersection_plot.png'):
+        # Your vehicle's position
+        my_car = AV_array[0]
+        my_car_pos = Point(my_car.lat, my_car.long)
+
+        # Display buildings
+        fig, ax = plt.subplots(figsize=(10, 10))
+        buildings.plot(ax=ax, edgecolor='k', facecolor='none', alpha=0.7)
+
+        # Display your vehicle's point
+        ax.scatter(*my_car_pos.coords.xy, color='red', label=f'My Car ({my_car.ID})', s=50, zorder=2)
+
+        for i, other_car in enumerate(AV_array[1:]):
+            # Other vehicle's position
+            other_car_pos = Point(other_car.lat, other_car.long)
+
+            # Display the other vehicle's point
+            ax.scatter(*other_car_pos.coords.xy, label=f'Car {other_car.ID}', s=50, zorder=2)
+
+        # Plot obstacles from obs_array
+        for obstacle in obs_array:
+            obstacle_pos = Point(obstacle.lat, obstacle.long)
+            ax.scatter(*obstacle_pos.coords.xy, label=f'Obstacle {obstacle.ID}', marker='x', s=50, zorder=2)
+
+        # Graph configuration
+        ax.set_xlabel('Longitude')
+        ax.set_ylabel('Latitude')
+        ax.set_title('Intersection')
+        ax.axis('equal')
+
+        # Create a separate legend window
+        legend = ax.legend(loc='upper left', bbox_to_anchor=(1, 1))
+        legend.get_frame().set_facecolor('white')
+        
+        # Adjust subplot to make room for the legend
+        plt.subplots_adjust(right=0.8)
+
+        # Save the plot
+        plt.savefig(save_path)
+
+        # Show the graph if needed
         plt.show()
