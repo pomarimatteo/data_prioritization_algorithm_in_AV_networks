@@ -399,39 +399,6 @@ class Simulated_Scenario:
                               'Messages': messages_to_send
                               })
                               
-                              '''  
-                              # redundant count
-                              for data in messages_to_send:
-                                   obstacles = data['obstacles']
-                                   id_list = [tupla[0] for tupla in obstacles]
-
-                                   obs_id_unknown = list(set(id_list) - set(redundancy_dict[receiver_id]))
-
-                                   if obs_id_unknown:
-                                        redundancy_dict[receiver_id].extend(obs_id_unknown)
-                                        
-                                   else:
-                                        redundancy_sent_count[sender_id] += 1 
-                                        redundancy_received_count[receiver_id] += 1 
-                                        redundancy_count += 1
-                              '''
-                              '''
-                              # redundant count
-                              for data in messages_to_send:
-                                   obstacles = data['obstacles']
-                                   id_list = [tupla for tupla in obstacles]
-
-                                   obs_id_unknown = list(set(id_list) - set(redundancy_dict[receiver_id]))
-                                   
-                                   if obs_id_unknown:
-                                        redundancy_dict[receiver_id].extend(obs_id_unknown)
-                                        
-                                   else:
-                                        redundancy_sent_count[sender_id] += 1 
-                                        redundancy_received_count[receiver_id] += 1 
-                                        redundancy_count += 1
-                              '''
-                              
                               # redundant count
                               for data in messages_to_send:
                                    obstacles = data['obstacles']
@@ -445,41 +412,36 @@ class Simulated_Scenario:
                                         redundancy_count += 1
                                    
                                    redundancy_dict[receiver_id].extend(id_list)
- 
-                              
-          #self.plot_mex_counts(messages_sent_count, messages_received_count, 'data/mex_counts_broadcast.png')
-          
-     
-          #print('CHECK')
-          #print('redundancy_count', redundancy_count)
 
-          #pprint.pprint(self.average_dist(array))
+          average_dist = self.average_dist(array)
+          redundancy_perc = redundancy_count/total_messages_sent * 100
           
+          # PLOT AND SAVE                    
+          self.plot_mex_counts(messages_sent_count, messages_received_count, 'data/mex_counts_broadcast.png')
           self.save_AV_mex_count(messages_sent_count, messages_received_count, total_messages_sent, 'data/AV_mex_count_broadcast.xlsx')
           self.save_content_communication(messages_data, 'data/content_communication_broadcast.xlsx')
 
-          print(f"Total messages sent during the broadcast simulation: {total_messages_sent}")
+
+          #pprint.pprint(self.average_dist(array))
+          #print(f"Total messages sent during the broadcast simulation: {total_messages_sent}")
           
-          
-          
+          # PRINT
+          print('********************')
           print('BRODCAST SIMULATION')
+          print('********************')
           print('Total messages:', total_messages_sent)
-          print('Average value:', self.average_dist(array))
+          print('Average value: {:.2f}'.format(average_dist))
           print('Redundancy count: ', redundancy_count)
-          print('Redundancy ',redundancy_count/total_messages_sent,'%')
+          print('Redundancy {:.2f}%'.format(redundancy_perc))
           
      def average_dist(self,lista_tuple):
-          # Dizionario per memorizzare la distanza minima per ogni obs_id
           dist_minime_per_obs = {}
           
-          # Scorro tutte le tuple nella lista
           for obs_id, dist in lista_tuple:
                # Se l'obs_id non è presente nel dizionario o la distanza è minore di quella memorizzata, aggiorna il valore
                if obs_id not in dist_minime_per_obs or dist < dist_minime_per_obs[obs_id][1]:
                     dist_minime_per_obs[obs_id] = (obs_id, dist)
-          
-          # Calcola la media delle distanze minime
-          
+                    
           
           distanze_minime = [dist for _, dist in dist_minime_per_obs.values()]
           media = sum(distanze_minime) / len(distanze_minime) if len(distanze_minime) > 0 else 0
@@ -491,8 +453,7 @@ class Simulated_Scenario:
           sum_score = sum(dist for _ , dist in list)
           mean_score = sum_score / (len(list))
           
-          return mean_score
-               
+          return mean_score     
 
      # private     
      def determine_messages_to_send_broadcast(self, sender_car):
@@ -506,34 +467,11 @@ class Simulated_Scenario:
 
                unique_obstacles_tupla = [(obs.ID, dist) for obs, dist in sender_car.visible_obs if obs.ID in sender_obstacle_ids]
 
-               # Aggiungi gli ID e le distanze degli ostacoli alla direzione corrente
                direction_data = {'direction': direction, 'obstacles': unique_obstacles_tupla}
                messages_to_send.append(direction_data)
 
           return messages_to_send, n_added_directions
      
-     def determine_messages_to_send_broadcast_(self, sender_car, redundant_count):
-          messages_to_send = []
-          n_added_directions = 0
-
-          for direction in ['north', 'south', 'east', 'west']:
-               sender_obstacle_ids = {obs.ID: dist for obs, dist in sender_car.visible_obs}
-
-               n_added_directions += 1
-
-               unique_obstacles_tupla = [(obs.ID, dist) for obs, dist in sender_car.visible_obs if obs.ID in sender_obstacle_ids]
-
-               # Check for redundant information
-               direction_obstacles = set(obs_id for obs_id, _ in unique_obstacles_tupla)
-               if direction_obstacles.issubset(sender_obstacle_ids.keys()):
-                    print(f"Redundant information in direction {direction}: {direction_obstacles}")
-                    redundant_count += 1
-
-               # Aggiungi gli ID e le distanze degli ostacoli alla direzione corrente
-               direction_data = {'direction': direction, 'obstacles': unique_obstacles_tupla}
-               messages_to_send.append(direction_data)
-
-          return messages_to_send, n_added_directions, redundant_count
      
      # NAIVE METHOD
      # **************************************************************************** #
@@ -563,12 +501,6 @@ class Simulated_Scenario:
           redundancy_sent_count = {car.ID: 0 for car in self.array_AVs}
           redundancy_received_count = {car.ID: 0 for car in self.array_AVs}
           redundancy_count = 0
-          
-          '''
-          for receiver_car in self.array_AVs:
-               receiver_id = receiver_car.ID
-               redundancy_dict[receiver_id] = [(obs.ID, dist) for obs, dist in receiver_car.visible_obs]
-          '''
           
           for receiver_car in self.array_AVs:
                receiver_id = receiver_car.ID
@@ -609,7 +541,6 @@ class Simulated_Scenario:
                               obstacles = data['obstacles']
                               
                               
-                              
                               tupla_list = [tupla for tupla in obstacles]
                               tupla_list_id = [tupla[0] for tupla in obstacles]
                               
@@ -623,7 +554,6 @@ class Simulated_Scenario:
                                    redundancy_count += 1
                               
                               for obs_id in obs_unknown:
-                                   # Trova tutte le distanze associate a obs_id
 
                                    for tupla in tupla_list:
                                         if tupla[0] == obs_id:
@@ -636,24 +566,33 @@ class Simulated_Scenario:
                        
                               
                               
-          pprint.pprint(redundancy_dict)       
-          print('media_distanza_tra_tuple',self.media_distanza_tra_tuple(redundancy_dict))   
-          #pprint.pprint(self.trova_minore(redundancy_dict))                   
-
-          
-                               
+          #pprint.pprint(redundancy_dict)       
+          #print('media_distanza_tra_tuple',self.media_distanza_tra_tuple(redundancy_dict))   
+          #pprint.pprint(self.trova_minore(redundancy_dict))                                                  
           #pprint.pprint(self.average_dist(array))
-
-             
+          
+          redundancy_perc = redundancy_count/total_messages_sent * 100
+          average_dist = self.media_distanza_tra_tuple(redundancy_dict)
+                       
           # plot and save
           self.plot_mex_counts(messages_sent_count, messages_received_count, 'data/mex_counts_naive.png')
-          print('redundancy_count', redundancy_count)
           self.plot_mex_counts(redundancy_sent_count, redundancy_received_count, 'data/redundat_mex_counts_broadcast.png')
-          
           self.save_AV_mex_count(messages_sent_count, messages_received_count, total_messages_sent, 'data/AV_mex_count_naive.xlsx')
           self.save_content_communication(messages_data, 'data/content_communication_naive.xlsx')
           
-          print(f"Total messages sent during the naive simulation: {total_messages_sent}")
+          #print(f"Total messages sent during the naive simulation: {total_messages_sent}")
+          
+          
+          # PRINT
+          print('********************')
+          print('NAIVE SIMULATION')
+          print('********************')
+          print('Total messages:', total_messages_sent)
+          print('Average value: {:.2f}'.format(average_dist))
+          print('Redundancy count: ', redundancy_count)
+          print('Redundancy {:.2f}%'.format(redundancy_perc))
+          
+          
      
      def determine_messages_to_send_naive(self, sender_car, receiver_car):
           messages_to_send = []
@@ -712,20 +651,7 @@ class Simulated_Scenario:
           
           return risultato
      
-     
-     def trova_minore(self,dizionario):
-          risultato = {}
-          
-          for chiave, lista_tupla in dizionario.items():
-               osservazioni = {}
-               for tupla in lista_tupla:
-                    oggetto, distanza = tupla
-                    if oggetto not in osservazioni or distanza < osservazioni[oggetto]:
-                         osservazioni[oggetto] = distanza
-               
-               risultato[chiave] = [(oggetto, distanza) for oggetto, distanza in osservazioni.items()]
-          
-          return risultato
+
      
      # MY METHOD OPTIMIZED
      # **************************************************************************** #
@@ -737,12 +663,10 @@ class Simulated_Scenario:
           messages_received_count = {car.ID: 0 for car in self.array_AVs}
           obs_info, obstacle_dict = self.find_min_distance_directions()
 
-          print('obs_info: ',obs_info)
-          print('obstacle_dict',obstacle_dict)
           
           for received_car in self.array_AVs:
                list_obj = []
-               print('received car: ', received_car.ID)
+               #print('received car: ', received_car.ID)
 
                for obs_ID in obs_info.keys():
                     if obs_ID not in [obs_c.ID for obs_c, dist in received_car.visible_obs]:
@@ -750,8 +674,6 @@ class Simulated_Scenario:
 
                car_direction_pairs = set()
                processed_pairs = set()  
-               obs_mex = {}
-               messages_to_send = []  
 
                for obs_ID in list_obj:
                     for (sender_car, direction), obs_info_list in obstacle_dict.items():
@@ -761,7 +683,7 @@ class Simulated_Scenario:
                                    processed_pairs.add((sender_car, direction))
                                    
 
-               print('car_direction_pairs',car_direction_pairs)
+               #print('car_direction_pairs',car_direction_pairs)
                
                
                for (sender_car, direction) in car_direction_pairs: #(key = sender_car, direction)
@@ -780,14 +702,23 @@ class Simulated_Scenario:
                          messages_received_count[received_car.ID] += 1
                          total_messages_sent += 1
                          
-          unique_obstacles_dict = self.create_unique_obstacles_dict_opt(messages_data)
-          print('unique_obstacles_dict',unique_obstacles_dict)
+          average_dist, unique_obstacles_dict = self.create_unique_obstacles_dict_opt(messages_data)
+          #print('unique_obstacles_dict',unique_obstacles_dict)
           # plot and save
           self.plot_mex_counts(messages_sent_count, messages_received_count, 'data/mex_counts_optimize.png')
           self.save_AV_mex_count(messages_sent_count, messages_received_count, total_messages_sent, 'data/AV_MEX_counts_optimize.xlsx')
           self.save_content_communication(messages_data, 'data/content_communication_mex_counts_optimize.xlsx')
           
-          print(f"Total messages sent during the optimized simulation: {total_messages_sent}")
+          #print(f"Total messages sent during the optimized simulation: {total_messages_sent}")
+          
+          
+          # PRINT
+          print('********************')
+          print('OPTIMIZES SIMULATION')
+          print('********************')
+          print('Total messages:', total_messages_sent)
+          print('Average value: {:.2f}'.format(average_dist))
+
 
      # min dist
      def find_min_distance_directions(self):
@@ -845,8 +776,8 @@ class Simulated_Scenario:
                # Add the list to the dictionary
                unique_obstacles_dict[received_car.ID] = unique_obstacles_list
 
-          self.calculate_average_distance_opt(unique_obstacles_dict)
-          return unique_obstacles_dict
+          average_dist = self.calculate_average_distance_opt(unique_obstacles_dict)
+          return average_dist, unique_obstacles_dict
 
      def calculate_average_distance_opt(self, unique_obstacles_dict):
           total_distance = 0
@@ -861,7 +792,7 @@ class Simulated_Scenario:
                return 0  # To avoid division by zero if there are no obstacles
 
           average_distance = total_distance / total_count
-          print(f"Average distance of unique obstacles opt: {average_distance}")
+          #print(f"Average distance of unique obstacles opt: {average_distance}")
 
           return average_distance
      
