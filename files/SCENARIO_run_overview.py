@@ -47,13 +47,17 @@ class SCENARIO_run_overview:
     scenario_1 = Simulated_Scenario()
     scenario_1.process_all_AVs()
     scenario_1.process_all_obs()
-    #util_vsb.save_test(scenario_1.array_AVs,scenario_1.obs_array, scenario_1.intersection)
+    # util_vsb.save_test(scenario_1.array_AVs,scenario_1.obs_array, scenario_1.intersection)
     scenario_1.to_excel()
     
     scenario_1.simulate_broadcast_communication()
     scenario_1.simulate_naive_communication()
-    #scenario_1.simulate_optimized_communication()
-
+    scenario_1.simulate_optimized_communication()
+    
+    #scenario_1.plot_communication_stats('data/content_communication_broadcast.xlsx', 'data/content_communication_naive.xlsx', 'data/content_communication_mex_counts_optimize.xlsx')
+    
+    #scenario_1.find_min_distance_directions()
+    #scenario_1.find_min_distance_and_construct_obstacle_dictionary()
 
 
     #scenario_1.evaluate_obstacles_visibility_dir()

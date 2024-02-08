@@ -26,6 +26,8 @@ class Car:
         self.obstacle_south = []
         self.obstacle_west = []
         
+        self.obstalce_received = []
+        
     def get_visible_obs(self):
         return self.visible_obs
     
@@ -43,6 +45,18 @@ class Car:
 
     def get_visible_west(self):
         return self.visible_west
+
+    def get_direction(self, tupla):
+          
+          if tupla in self.obstacle_north:
+               return 'north'
+          elif tupla in self.obstacle_south:
+               return 'south'
+          elif tupla in self.obstacle_east:
+               return 'east'
+          elif tupla in self.obstacle_west:
+               return 'west'
+
 
     def print_car_info(self):
         car_ids = [car.ID for car in self.cars_in_range]
