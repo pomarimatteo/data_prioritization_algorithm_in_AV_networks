@@ -57,7 +57,52 @@ class Car:
           elif tupla in self.obstacle_west:
                return 'west'
 
+    
+    def get_dir_dict(self):
+        my_dict = {'north': [(obs.ID, dist) for obs, dist in self.obstacle_north],
+                'south': [(obs.ID, dist) for obs, dist in self.obstacle_south],
+                'east': [(obs.ID, dist) for obs, dist in self.obstacle_east],
+                'west': [(obs.ID, dist) for obs, dist in self.obstacle_west]}
+        return my_dict
 
+    def get_mean_value_dir_dict(self):
+        average_distances = {}
+        count_directions = {'north': 0, 'south': 0, 'east': 0, 'west': 0}
+
+        for direction, obstacles in self.get_dir_dict().items():
+            total_distance = sum(dist for _, dist in obstacles)
+            count = len(obstacles)
+            
+            if count > 0:
+                average_distance = total_distance / count
+                average_distances[direction] = average_distance
+                count_directions[direction] = count
+
+        return average_distances
+    
+    def get_direction_importance(self):
+        direction_importance = {'north': (0, 0), 'south': (0, 0), 'east': (0, 0), 'west': (0, 0)}
+
+        direction_counts = {'north': 0, 'south': 0, 'east': 0, 'west': 0}
+        direction_distances = {'north': 0, 'south': 0, 'east': 0, 'west': 0}
+
+        for obs, dist in self.visible_obs:
+            direction = self.get_direction((obs, dist))
+            direction_counts[direction] += 1
+            direction_distances[direction] += dist
+
+        for direction in direction_importance:
+            if direction_counts[direction] > 0:
+                average_dist = direction_distances[direction] / direction_counts[direction]
+                # Round average_dist to 2 decimal places
+                average_dist = round(average_dist, 2)
+                direction_importance[direction] = (direction_counts[direction], average_dist)
+
+        return direction_importance
+    
+    
+    
+    
     def print_car_info(self):
         car_ids = [car.ID for car in self.cars_in_range]
         north_ids = [car.ID for car in self.visible_north]

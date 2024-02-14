@@ -18,7 +18,7 @@ class Functions:
     @staticmethod
     def proximity_function(x, d0, k):
         # Proximity function indicating closeness to a point
-        return 1 - 1 / (1 + np.exp(-k * (x - d0)))
+        return  1 / (1 + np.exp(-k * (x - d0)))
 
     @staticmethod
     def accuracy_function(x):
@@ -131,4 +131,26 @@ Functions.plot_proximity_relation_strength(20,0.5)
 Functions.plot_n_obstacles_function(0.5,10)
 Functions.plot_proximity_function(50,0.5)
 Functions.plot_accuracy_function()
+'''
+#Functions.plot_accuracy_function()
+'''
+def tratti_continua(x):
+    if x > 0 and x < 45:
+        return 1 - 0.4 * (x / 45)
+    elif x >= 45 and x < 135:
+        return 0.6
+    elif x >= 135:
+        return 0.6 * np.exp(-0.02 * (x - 135))
+    else:
+        return None
+
+x_values = np.linspace(0, 180, 1000)
+y_values = [tratti_continua(x) for x in x_values]
+
+plt.plot(x_values, y_values)
+plt.title('Funzione definita a tratti continua')
+plt.xlabel('x')
+plt.ylabel('f(x)')
+plt.grid(True)
+plt.show()
 '''

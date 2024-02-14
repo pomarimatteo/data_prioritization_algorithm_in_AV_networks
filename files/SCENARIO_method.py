@@ -13,7 +13,7 @@ import seaborn as sns
 from AHP import AHP
 from AHP_conditional_VOI import Conditional_VOI
 import csv
-
+import os
 
 from tabulate import tabulate
 import pprint
@@ -26,8 +26,6 @@ from shapely.geometry import Point
 import json
 import random
 import matplotlib.pyplot as plt
-
-
 import geopandas as gpd 
 
 class Simulated_Scenario:
@@ -39,17 +37,18 @@ class Simulated_Scenario:
      intersection = gpd.read_file(geojson_path + 'map_001.geojson')
      road = gpd.read_file(geojson_path + 'road.geojson')
      
-     n_obs = 4
+     n_obs = 10
      
      # Generate map
      map = Map(intersection, road)
-          
+
      def __init__(self):
           self.array_AVs = self.generate_all_AVs()
           self.array_car_map = self.generate_all_car_map(self.array_AVs)
           self.obs_array = self.generate_obstacles(Simulated_Scenario.n_obs)
-          #self.obs_array = self.generate_all_obstacles()
           self.obstacles_visibility_info = {}
+          
+
           
           # param of scenario
           '''
@@ -59,8 +58,26 @@ class Simulated_Scenario:
           self.intersection
           self.road
           '''
-     
-     # BUILD SCENARIO
+          
+     '''
+     def __init__(self, polygon_spawn, car_data, n_obs, intersection, road):
+          
+          self.polygon_spawn = polygon_spawn
+          self.car_data = car_data
+          self.n_obs = n_obs
+          self.intersection = intersection
+          self.road = road
+          
+          # Generate map
+          self.map = Map(self.intersection, self.road)
+          
+          self.array_AVs = self.generate_all_AVs()
+          self.array_car_map = self.generate_all_car_map(self.array_AVs)
+          self.obs_array = self.generate_obstacles(self.n_obs)
+          self.obstacles_visibility_info = {}
+     '''
+
+     # BUILD SCENARIO #
      # **************************************************************************** #
      
      def generate_all_AVs(self):
@@ -106,7 +123,7 @@ class Simulated_Scenario:
 
                self.detect_other_AVs(AV_map, array_without_AV_map)
       
-     # private         
+     # private
      def detect_other_AVs(self, my_car_map, other_AVs):
           for other_AV in other_AVs:
                event = New_AV_updater(my_car_map, other_AV)
@@ -209,7 +226,7 @@ class Simulated_Scenario:
 
                self.process_obs(AV_map, self.obs_array)   
 
-     #private         
+     #private
      def process_obs(self, my_car_map, obs_array):
           for other_AV in obs_array:
                event = New_OBS_updater(my_car_map, other_AV)
@@ -300,62 +317,12 @@ class Simulated_Scenario:
 
         return messages_to_send
      
-     # BROADCAST METHOD
-     # **************************************************************************** #
+     # ***************** #
+     #                   #
+     # BROADCAST METHOD  #
+     #                   #
+     # ***************** #
      
-     def simulate_broadcast_communication_prior(self):
-          total_messages_sent = 0
-          messages_data = []
-          
-          # message count
-          messages_sent_count = {car.ID: 0 for car in self.array_AVs}
-          messages_received_count = {car.ID: 0 for car in self.array_AVs}
-          
-          # redundancy count
-          redundancy_dict = {car.ID: 0 for car in self.array_AVs}
-          redundancy_sent_count = {car.ID: 0 for car in self.array_AVs}
-          redundancy_received_count = {car.ID: 0 for car in self.array_AVs}
-
-          for sender_car in self.array_AVs:
-               sender_id = sender_car.ID
-
-               for receiver_car in self.array_AVs:
-                    receiver_id = receiver_car.ID
-                    
-                    # init condition
-                    if receiver_id not in redundancy_dict:
-                         redundancy_dict[receiver_car] = [obs.ID for obs, _ in receiver_car.visible_obs]
-
-                    if sender_id != receiver_id:
-                         # Determine all images to send from sender to receiver
-                         messages_to_send, n_mex = self.determine_messages_to_send_broadcast(sender_car)
-
-                         
-                         if n_mex:
-                              messages_sent_count[sender_id] += n_mex
-                              messages_received_count[receiver_id] += n_mex
-                              total_messages_sent += n_mex
-
-                         if messages_to_send:
-                              messages_data.append({
-                              'Sender_ID': sender_id,
-                              'Receiver_ID': receiver_id,
-                              'Messages': messages_to_send
-                              })
-                              
-                                   
-                              
-                         
-          obstacle_dictionary = self.create_obstacle_dictionary(messages_data)
-
-          print('obstacle_dictionary',obstacle_dictionary)
-          #print('redundant_count',redundant_count)
-          # plot and save
-          self.plot_mex_counts(messages_sent_count, messages_received_count, 'data/mex_counts_broadcast.png')
-          self.save_AV_mex_count(messages_sent_count, messages_received_count, total_messages_sent, 'data/AV_mex_count_broadcast.xlsx')
-          self.save_content_communication(messages_data, 'data/content_communication_broadcast.xlsx')
-
-          print(f"Total messages sent during the broadcast simulation: {total_messages_sent}")
      
      def simulate_broadcast_communication(self):
           total_messages_sent = 0
@@ -371,18 +338,16 @@ class Simulated_Scenario:
           redundancy_received_count = {car.ID: 0 for car in self.array_AVs}
           redundancy_count = 0
           
-          array = []
-
+          # init
+          for receiver_car in self.array_AVs:
+               redundancy_dict[receiver_car.ID] = [(obs.ID, dist) for obs, dist in receiver_car.visible_obs]
+          
           for sender_car in self.array_AVs:
                sender_id = sender_car.ID
 
                for receiver_car in self.array_AVs:
                     receiver_id = receiver_car.ID
-                    
-                    redundancy_dict[receiver_id] = [(obs.ID, dist) for obs, dist in receiver_car.visible_obs]
-
-                    array.extend([(obs.ID, dist) for obs, dist in receiver_car.visible_obs])
-                    
+                                        
                     if sender_id != receiver_id:
                          # Determine all images to send from sender to receiver
                          messages_to_send, n_mex = self.determine_messages_to_send_broadcast(sender_car)
@@ -412,18 +377,19 @@ class Simulated_Scenario:
                                         redundancy_count += 1
                                    
                                    redundancy_dict[receiver_id].extend(id_list)
-
-          average_dist = self.average_dist(array)
+          
+          
+          
+          # redundancy_dict cleaned
+          cln = self.remove_redundancy(redundancy_dict)                  
+          car_distances, average_dist = self.calculate_distances(cln)
+          
           redundancy_perc = redundancy_count/total_messages_sent * 100
           
           # PLOT AND SAVE                    
           self.plot_mex_counts(messages_sent_count, messages_received_count, 'data/mex_counts_broadcast.png')
           self.save_AV_mex_count(messages_sent_count, messages_received_count, total_messages_sent, 'data/AV_mex_count_broadcast.xlsx')
           self.save_content_communication(messages_data, 'data/content_communication_broadcast.xlsx')
-
-
-          #pprint.pprint(self.average_dist(array))
-          #print(f"Total messages sent during the broadcast simulation: {total_messages_sent}")
           
           # PRINT
           print('********************')
@@ -432,28 +398,7 @@ class Simulated_Scenario:
           print('Total messages:', total_messages_sent)
           print('Average value: {:.2f}'.format(average_dist))
           print('Redundancy count: ', redundancy_count)
-          print('Redundancy {:.2f}%'.format(redundancy_perc))
-          
-     def average_dist(self,lista_tuple):
-          dist_minime_per_obs = {}
-          
-          for obs_id, dist in lista_tuple:
-               # Se l'obs_id non è presente nel dizionario o la distanza è minore di quella memorizzata, aggiorna il valore
-               if obs_id not in dist_minime_per_obs or dist < dist_minime_per_obs[obs_id][1]:
-                    dist_minime_per_obs[obs_id] = (obs_id, dist)
-                    
-          
-          distanze_minime = [dist for _, dist in dist_minime_per_obs.values()]
-          media = sum(distanze_minime) / len(distanze_minime) if len(distanze_minime) > 0 else 0
-          
-          return media
-
-     # this
-     def mean_score(self, list):
-          sum_score = sum(dist for _ , dist in list)
-          mean_score = sum_score / (len(list))
-          
-          return mean_score     
+          print('Redundancy {:.2f}%'.format(redundancy_perc))  
 
      # private     
      def determine_messages_to_send_broadcast(self, sender_car):
@@ -472,9 +417,44 @@ class Simulated_Scenario:
 
           return messages_to_send, n_added_directions
      
+     # ******************** #
+      
+     def remove_redundancy(self, redundancy_dict):
+          cleaned_dict = {}
+
+          for receiver_id, obs_dist_list in redundancy_dict.items():
+               unique_obs_ids = set()
+               obs_with_min_dist = {}
+
+               for obs_id, dist in obs_dist_list:
+                    if obs_id not in unique_obs_ids or dist < obs_with_min_dist[obs_id][1]:
+                         obs_with_min_dist[obs_id] = (obs_id, dist)
+                    unique_obs_ids.add(obs_id)
+
+               cleaned_dict[receiver_id] = list(obs_with_min_dist.values())
+
+          return cleaned_dict
      
-     # NAIVE METHOD
-     # **************************************************************************** #
+     def calculate_distances(self, cleaned_dict):
+          car_distances = {}
+          all_car_distances = []
+
+          for car_id, obs_dist_list in cleaned_dict.items():
+               total_distance = sum(dist for _, dist in obs_dist_list)
+               average_distance = total_distance / len(obs_dist_list)
+               car_distances[car_id] = average_distance
+               all_car_distances.extend([dist for _, dist in obs_dist_list])
+
+          average_of_averages = sum(all_car_distances) / len(all_car_distances)
+
+          return car_distances, average_of_averages
+     
+     # ************* #
+     #               #
+     # NAIVE METHOD  #
+     #               #
+     # ************* #
+
      # every AV checks the obstacles derected from the other. 
      # It sends to everyone in need the info about their missing obs
      
@@ -561,18 +541,11 @@ class Simulated_Scenario:
                               
                                    redundancy_dict[receiver_id].append((obs_id,dist_data))
                                    
-                              
-                              
-                       
-                              
-                              
-          #pprint.pprint(redundancy_dict)       
-          #print('media_distanza_tra_tuple',self.media_distanza_tra_tuple(redundancy_dict))   
-          #pprint.pprint(self.trova_minore(redundancy_dict))                                                  
-          #pprint.pprint(self.average_dist(array))
-          
+          # redundancy_dict cleaned
+          cln = self.remove_redundancy(redundancy_dict)                  
+          car_distances, average_dist = self.calculate_distances(cln)
+                    
           redundancy_perc = redundancy_count/total_messages_sent * 100
-          average_dist = self.media_distanza_tra_tuple(redundancy_dict)
                        
           # plot and save
           self.plot_mex_counts(messages_sent_count, messages_received_count, 'data/mex_counts_naive.png')
@@ -581,6 +554,12 @@ class Simulated_Scenario:
           self.save_content_communication(messages_data, 'data/content_communication_naive.xlsx')
           
           #print(f"Total messages sent during the naive simulation: {total_messages_sent}")
+          
+          #self.data["simulation_type"].append('naive')
+          self.data_naive["total_messages_sent"].append(total_messages_sent)
+          self.data_naive["average_dist"].append(round(average_dist,2))
+          self.data_naive["redundancy_count"].append(redundancy_count)
+          self.data_naive["redundancy_perc"].append(round(redundancy_perc,2))
           
           
           # PRINT
@@ -592,8 +571,8 @@ class Simulated_Scenario:
           print('Redundancy count: ', redundancy_count)
           print('Redundancy {:.2f}%'.format(redundancy_perc))
           
+          return self.data_naive
           
-     
      def determine_messages_to_send_naive(self, sender_car, receiver_car):
           messages_to_send = []
           n_added_directions = 0
@@ -613,57 +592,21 @@ class Simulated_Scenario:
                     messages_to_send.append(direction_data)
 
           return messages_to_send, n_added_directions
-     
-     
-     def media_distanza_tra_tuple(self,dizionario):
-          # Inizializza le variabili per la somma delle distanze e il conteggio delle tuple
-          somma_distanze = 0
-          conteggio_tuple = 0
-          
-          # Itera attraverso il dizionario
-          for lista_tuple in dizionario.values():
-               # Itera attraverso la lista di tuple
-               for tupla in lista_tuple:
-                    # Aggiunge la distanza della tupla alla somma delle distanze
-                    somma_distanze += tupla[1]
-                    # Incrementa il conteggio delle tuple
-                    conteggio_tuple += 1
-          
-          # Calcola la distanza media
-          if conteggio_tuple > 0:
-               distanza_media = somma_distanze / conteggio_tuple
-          else:
-               distanza_media = 0
-          
-          return distanza_media
-     
-     def trova_minima_dist(self,array_tuple):
-          minime_distanze = {}
-          
-          for obs_id, dist in array_tuple:
-               # Se l'obs_id non è presente nel dizionario o la distanza è minore di quella attualmente registrata,
-               # aggiorniamo il valore nel dizionario
-               if obs_id not in minime_distanze or dist < minime_distanze[obs_id]:
-                    minime_distanze[obs_id] = dist
-          
-          # Convertiamo il dizionario in una lista di tuple
-          risultato = [(obs_id, dist) for obs_id, dist in minime_distanze.items()]
-          
-          return risultato
-     
 
-     
-     # MY METHOD OPTIMIZED
-     # **************************************************************************** #
-     
-     def simulate_optimized_communication(self):
+     # ******************** #
+     #                      #
+     # MY METHOD OPTIMIZED  #
+     #                      #
+     # ******************** #
+         
+     def simulate_optimized_communication_(self):
           total_messages_sent = 0
           messages_data = []
           messages_sent_count = {car.ID: 0 for car in self.array_AVs}
           messages_received_count = {car.ID: 0 for car in self.array_AVs}
+          
           obs_info, obstacle_dict = self.find_min_distance_directions()
 
-          
           for received_car in self.array_AVs:
                list_obj = []
                #print('received car: ', received_car.ID)
@@ -682,9 +625,7 @@ class Simulated_Scenario:
                                    car_direction_pairs.add((sender_car, direction))
                                    processed_pairs.add((sender_car, direction))
                                    
-
                #print('car_direction_pairs',car_direction_pairs)
-               
                
                for (sender_car, direction) in car_direction_pairs: #(key = sender_car, direction)
                     if (sender_car, direction) in obstacle_dict:
@@ -702,7 +643,7 @@ class Simulated_Scenario:
                          messages_received_count[received_car.ID] += 1
                          total_messages_sent += 1
                          
-          average_dist, unique_obstacles_dict = self.create_unique_obstacles_dict_opt(messages_data)
+          average_value, unique_obstacles_dict = self.create_unique_obstacles_dict_opt(messages_data)
           #print('unique_obstacles_dict',unique_obstacles_dict)
           # plot and save
           self.plot_mex_counts(messages_sent_count, messages_received_count, 'data/mex_counts_optimize.png')
@@ -710,16 +651,21 @@ class Simulated_Scenario:
           self.save_content_communication(messages_data, 'data/content_communication_mex_counts_optimize.xlsx')
           
           #print(f"Total messages sent during the optimized simulation: {total_messages_sent}")
-          
-          
+
           # PRINT
           print('********************')
           print('OPTIMIZES SIMULATION')
           print('********************')
           print('Total messages:', total_messages_sent)
-          print('Average value: {:.2f}'.format(average_dist))
-
-
+          print('Average value: {:.2f}'.format(average_value))
+            
+          self.data_optimized["total_messages_sent"].append(total_messages_sent)
+          self.data_optimized["average_dist"].append(round(average_value,2))
+          self.data_optimized["redundancy_count"].append(0)
+          self.data_optimized["redundancy_perc"].append(0)
+          
+          return self.data_optimized
+          
      # min dist
      def find_min_distance_directions(self):
           obs_info = {}
@@ -796,6 +742,331 @@ class Simulated_Scenario:
 
           return average_distance
      
+     '''
+     def simulate_optimized_communication(self):
+          total_messages_sent = 0
+          messages_data = []
+          messages_sent_count = {car.ID: 0 for car in self.array_AVs}
+          messages_received_count = {car.ID: 0 for car in self.array_AVs}
+          obs_info, obstacle_dict = self.find_min_distance_directions()
+          
+          # Calcolo della classifica di importanza delle direzioni
+          ranked_directions = self.prioritize_directions_by_obstacles()
+
+          for received_car in self.array_AVs:
+               list_obj = []
+               
+               for obs_ID in obs_info.keys():
+                    if obs_ID not in [obs_c.ID for obs_c, dist in received_car.visible_obs]:
+                         list_obj.append(obs_ID)
+
+               car_direction_pairs = set()
+               processed_pairs = set()  
+
+               for obs_ID in list_obj:
+                    for (sender_car, direction), obs_info_list in obstacle_dict.items():
+                         if direction == ranked_directions[0][0]:  # Utilizza la direzione più importante
+                              for obs, dist in obs_info_list:
+                                   if obs == obs_ID and (sender_car, direction) not in processed_pairs:
+                                        car_direction_pairs.add((sender_car, direction))
+                                        processed_pairs.add((sender_car, direction))
+                                   
+               for (sender_car, direction) in car_direction_pairs:
+                    if (sender_car, direction) in obstacle_dict:
+                         content = obstacle_dict[(sender_car, direction)]
+                         messages_data.append({
+                              'Sender_ID': sender_car,
+                              'Receiver_ID': received_car.ID,
+                              'Messages': content
+                         })
+                         
+                         messages_sent_count[sender_car] += 1  
+                         messages_received_count[received_car.ID] += 1
+                         total_messages_sent += 1
+
+          average_value, unique_obstacles_dict = self.create_unique_obstacles_dict_opt(messages_data)
+          self.plot_mex_counts(messages_sent_count, messages_received_count, 'data/mex_counts_optimize.png')
+          self.save_AV_mex_count(messages_sent_count, messages_received_count, total_messages_sent, 'data/AV_MEX_counts_optimize.xlsx')
+          self.save_content_communication(messages_data, 'data/content_communication_mex_counts_optimize.xlsx')
+          
+          print('********************')
+          print('OPTIMIZES SIMULATION')
+          print('********************')
+          print('Total messages:', total_messages_sent)
+          print('Average value: {:.2f}'.format(average_value))
+          
+          self.data_optimized["total_messages_sent"].append(total_messages_sent)
+          self.data_optimized["average_dist"].append(round(average_value,2))
+          self.data_optimized["redundancy_count"].append(0)
+          self.data_optimized["redundancy_perc"].append(0)
+          
+          return self.data_optimized
+     
+     def prioritize_directions_by_obstacles(self):
+          direction_importance = {'north': 0, 'south': 0, 'east': 0, 'west': 0}
+
+          for car in self.array_AVs:
+               for obs_c, _ in car.visible_obs:
+                    direction = car.get_direction((obs_c, _))
+                    direction_importance[direction] += 1
+
+          # Ordiniamo le direzioni per importanza decrescente
+          ranked_directions = sorted(direction_importance.items(), key=lambda x: x[1], reverse=True)
+          print('ranked_directions',ranked_directions)
+          return ranked_directions
+
+
+     def method(self):
+          dict_directions = {}
+
+          for car in self.array_AVs:
+               direction_importance = {'north': 0, 'south': 0, 'east': 0, 'west': 0}
+
+               for obs_c, _ in car.visible_obs:
+                    direction = car.get_direction((obs_c, _))
+                    direction_importance[direction] += 1
+
+               dict_directions[car.ID] = direction_importance
+          print(dict_directions)
+          return dict_directions
+     
+     def prioritize_directions_by_obstacles(self):
+          dict = {car.ID: set() for car in self.array_AVs}
+          for car in self.array_AVs:
+               direction_importance = {car.ID: {'north': 0, 'south': 0, 'east': 0, 'west': 0} for car in self.array_AVs}
+
+               for car in self.array_AVs:
+                    for obs_c, _ in car.visible_obs:
+                         direction = car.get_direction((obs_c, _))
+                         direction_importance[car.ID][direction] += 1
+
+               messages_to_send = []
+
+               for car in self.array_AVs:
+                    max_direction = max(direction_importance[car.ID], key=direction_importance[car.ID].get)
+                    max_count = direction_importance[car.ID][max_direction]
+                    message = f"Car {car.ID}, direction {max_direction} with {max_count} obstacles"
+                    messages_to_send.append(message)
+
+          return messages_to_send
+
+     def get_visible_obstacles_by_direction(self):
+          obstacles_by_direction = {}
+
+          for direction_func_name in ['get_visible_north', 'get_visible_south', 'get_visible_east', 'get_visible_west']:
+               direction = direction_func_name.split('_')[-1].upper()
+               visible_objects = getattr(self, direction_func_name)()
+               for obs_c, dist in visible_objects:
+                    key = (self.ID, direction)
+                    if key not in obstacles_by_direction:
+                         obstacles_by_direction[key] = []
+                    obstacles_by_direction[key].append((obs_c.ID, dist))
+          print('obstacles_by_direction',obstacles_by_direction)
+          return obstacles_by_direction
+     '''
+     # **************************************************************************** #
+     
+     def optimized_method(self):
+          direction_ranking, _ = self.method()
+          total_messages_sent = 0
+          messages_data = []
+          
+          red_array = []
+          
+          # Message count
+          messages_sent_count = {car.ID: 0 for car in self.array_AVs}
+          messages_received_count = {car.ID: 0 for car in self.array_AVs}
+          
+          # Redundancy count
+          redundancy_dict = {car.ID: [] for car in self.array_AVs}
+          redundancy_sent_count = {car.ID: 0 for car in self.array_AVs}
+          redundancy_received_count = {car.ID: 0 for car in self.array_AVs}
+          redundancy_count = 0
+          
+          # init
+          for receiver_car in self.array_AVs:
+               redundancy_dict[receiver_car.ID] = [(obs.ID, dist) for obs, dist in receiver_car.visible_obs]
+
+
+          for sender_car in self.array_AVs:
+               sender_id = sender_car.ID
+
+               for receiver_car in self.array_AVs:
+                    receiver_id = receiver_car.ID
+                                        
+                    if sender_id != receiver_id:
+                         # Determine messages to send based on direction ranking
+                         messages_to_send, n_mex, red = self.determine_messages_optimized(sender_car, receiver_car, direction_ranking, redundancy_dict)
+                         
+                         red_array.append(red)
+                         
+                         if n_mex:
+                              messages_sent_count[sender_id] += n_mex
+                              messages_received_count[receiver_id] += n_mex
+                              total_messages_sent += n_mex
+
+                         if messages_to_send:
+                              messages_data.append({
+                              'Sender_ID': sender_id,
+                              'Receiver_ID': receiver_id,
+                              'Messages': messages_to_send
+                              })
+                              
+     
+          # redundancy_dict cleaned
+          cln = self.remove_redundancy(redundancy_dict)                  
+          car_distances, average_dist = self.calculate_distances(cln)
+          
+          
+          redundancy_perc = redundancy_count / total_messages_sent * 100
+          
+          red_final = self.valore_medio(red_array)
+          print('red_final',red_final)
+          # Plot and save                    
+          self.plot_mex_counts(messages_sent_count, messages_received_count, 'data/mex_counts_optimized.png')
+          self.save_AV_mex_count(messages_sent_count, messages_received_count, total_messages_sent, 'data/AV_mex_count_optimized.xlsx')
+          self.save_content_communication(messages_data, 'data/content_communication_optimized.xlsx')
+
+          # Update data
+          self.data_optimized["total_messages_sent"].append(total_messages_sent)
+          self.data_optimized["average_dist"].append(round(average_dist, 2))
+          self.data_optimized["redundancy_count"].append(redundancy_count)
+          self.data_optimized["redundancy_perc"].append(round(redundancy_perc, 2))
+                    
+          # Print simulation results
+          print('********************')
+          print('OPTIMIZED SIMULATION')
+          print('********************')
+          print('Total messages:', total_messages_sent)
+          print('Average value: {:.2f}'.format(average_dist))
+          print('Redundancy count:', redundancy_count)
+          print('Redundancy {:.2f}%'.format(redundancy_perc))
+
+          return self.data_optimized
+
+               
+     def determine_messages_optimized_(self, sender_car, receiver_car, direction_ranking, known_obstacles_dict,redundancy_sent_count,redundancy_received_count, redundancy_count):
+          messages_to_send = []
+          n_mex = 0
+
+          sender_id = sender_car.ID
+          receiver_id = receiver_car.ID
+          
+
+
+          for (receiver_id, direction), _ in direction_ranking:
+               if sender_id != receiver_id:
+                    receiver_obstacle_ids = {obs.ID for obs, dist in known_obstacles_dict[receiver_id]}
+
+                    # Get obstacles not known to receiver in the direction
+                    
+                    sender_direction_obs_ids = {obs.ID for obs, dist in getattr(sender_car, f'obstacle_{direction}')}
+                    unique_obstacle_ids = sender_direction_obs_ids - receiver_obstacle_ids
+                    
+                    if unique_obstacle_ids:
+                         known_obstacles_dict[receiver_id].exend(obs for obs, dist in getattr(sender_car, f'obstacle_{direction}'))
+                    
+                    # Count redundancy
+                    if not(unique_obstacle_ids):
+                         redundancy_sent_count[sender_id] += 1 
+                         redundancy_received_count[receiver_id] += 1 
+                         redundancy_count += 1
+                    
+                    direction_data = {'direction': direction, 'obstacles': unique_obstacles_tupla}
+                    messages_to_send.append(direction_data)
+               
+
+          return messages_to_send, n_mex
+
+     def determine_messages_optimized(self, sender_car, receiver_car, direction_ranking, known_obstacles_dict):
+          messages_to_send = []
+          n_mex = 0
+
+          sender_id = sender_car.ID
+          receiver_id = receiver_car.ID
+          
+          red_mess = []
+
+          for (receiver_id, direction), _ in direction_ranking:
+               if sender_id != receiver_id:
+                    receiver_obstacle_ids = {obs for obs, dist in known_obstacles_dict[receiver_id]}
+
+                    # Get obstacles not known to receiver in the direction
+                    sender_direction_obs_ids = {obs.ID for obs, dist in getattr(sender_car, f'obstacle_{direction}')}
+                    unique_obstacle_ids = sender_direction_obs_ids - receiver_obstacle_ids
+                    
+                    unique_obstacles_tupla = {(obs.ID,dist) for obs, dist in getattr(sender_car, f'obstacle_{direction}')}
+                    
+                    n_obs_red = len(sender_direction_obs_ids) - len(unique_obstacle_ids)
+                    
+                    if(sender_direction_obs_ids):
+                         red_mess.append(n_obs_red/len(sender_direction_obs_ids))
+                    else:  
+                         red_mess.append(0)
+                     
+                    
+                    if unique_obstacle_ids:
+                         known_obstacles_dict[receiver_id].extend((obs.ID,dist) for obs, dist in getattr(sender_car, f'obstacle_{direction}'))
+                         
+                         n_mex += 1
+                         
+                    direction_data = {'direction': direction, 'obstacles': unique_obstacles_tupla}
+                    messages_to_send.append(direction_data)
+                    
+                    
+                    direction_data = {'direction': direction, 'obstacles': unique_obstacles_tupla}
+                    messages_to_send.append(direction_data)
+
+          red = self.valore_medio(red_mess)
+                    
+
+          return messages_to_send, n_mex, red
+
+
+
+     #dict (#obs,average_value)
+     def method(self):
+          dict = {}
+          for car in self.array_AVs:
+               dict[car.ID] = car.get_direction_importance()
+               
+          sorted_directions = self.rank_directions_across_cars(dict)
+               
+          return sorted_directions, dict 
+     
+     # evrey obs from every car direction
+     def method_2(self):
+          dir_dict = {}
+          for car in self.array_AVs:
+               dir_dict[car.ID] = car.get_dir_dict()
+
+          print('dir_dict', dir_dict)
+          return dir_dict
+
+     # ranking based on #obs
+     def rank_directions_across_cars(self, direction_importance_dict):
+          direction_ranking = {}
+
+          for car_id, direction_importance in direction_importance_dict.items():
+               for direction, (n_obs, avg_dist) in direction_importance.items():
+                    direction_ranking[(car_id, direction)] = (n_obs, avg_dist)
+
+          sorted_directions = sorted(direction_ranking.items(), key=lambda x: x[1][0], reverse=True)
+          return sorted_directions
+
+     
+
+     def valore_medio(self,array):
+          if len(array) == 0:
+               return 0  # Se l'array è vuoto, il valore medio è 0 per convenzione
+          else:
+               somma = sum(array)
+               media = somma / len(array)
+               return media
+    
+     # **************************************************************************** #
+
+     
      # PLOT & SAVE METHODS
      # **************************************************************************** #
 
@@ -832,7 +1103,7 @@ class Simulated_Scenario:
 
           # Display the plot
           plt.savefig(save_path)
-          plt.show()
+          #plt.show()
      
      # to exel
      def save_AV_mex_count(self, messages_sent_count, messages_received_count, total_messages_sent, filename = 'data/AV_mex_count.xlsx'):
@@ -903,6 +1174,37 @@ class Simulated_Scenario:
           return car_averages, total_average_distance
           
      # **************************************************************************** #
+     
+     def save_to_excel__(self, filename):
+        # Trova la lunghezza massima tra tutte le liste
+        max_length = max(len(values) for values in self.data_broadcast.values())
+
+        # Crea un DataFrame vuoto con righe pari alla lunghezza massima
+        df = pd.DataFrame(index=range(max_length))
+
+        # Aggiungi la colonna 'simulation_type'
+        df['simulation_type'] = self.data_broadcast['simulation_type'][0]
+
+        # Aggiungi i dati alle colonne del DataFrame
+        for key, values in self.data_broadcast.items():
+            if key != "simulation_type":  # Non includere 'simulation_type' nelle colonne
+                padded_values = values + [None] * (max_length - len(values))  # Aggiungi valori nulli per raggiungere la lunghezza massima
+                df[key] = padded_values
+
+        # Salvataggio del DataFrame in un file Excel
+        df.to_excel(filename, index=False)
+
+     def plot_results(self,data, title):
+          plt.figure(figsize=(10, 6))
+          plt.plot(data['total_messages_sent'], label='Total Messages Sent', color='blue')
+          plt.plot(data['average_dist'], label='Average Distance', color='green')
+          plt.plot(data['redundancy_perc'], label='Redundancy Percentage', color='red')
+          plt.title(title)
+          plt.xlabel('Simulation Iteration')
+          plt.ylabel('Value')
+          plt.legend()
+          plt.grid(True)
+          plt.show()
 
      def plot_communication_stats(self, broadcast_file, naive_file, optimized_file):
         # Carica i dati dai file Excel specifici

@@ -17,8 +17,11 @@ class My_car_map:
         
         self.obs = []
         
-        #self.fig, self.ax = self.generate_intersection()
+        self.AV = []
         
+        #self.fig, self.ax = self.generate_intersection()
+    
+    
         
     def add_obs(self,obs):
         self.obs.append(obs)
