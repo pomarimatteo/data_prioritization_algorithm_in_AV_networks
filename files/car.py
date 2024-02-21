@@ -25,8 +25,15 @@ class Car:
         self.obstacle_east = []
         self.obstacle_south = []
         self.obstacle_west = []
+                
         
-        self.obstalce_received = []
+    def find_obs_direction(self, obs_ID):
+        for direction in ['north', 'east', 'south', 'west']:
+            obs_list = getattr(self, f'obstacle_{direction}')
+            for obs in obs_list:
+                if obs[0] == obs_ID:
+                    return direction, obs[1]
+        return None, None
         
     def get_visible_obs(self):
         return self.visible_obs

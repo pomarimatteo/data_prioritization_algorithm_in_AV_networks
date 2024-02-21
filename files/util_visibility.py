@@ -120,7 +120,7 @@ class Util_visibility():
     # shows the intersection and the lines that connect all the cars to myself
     # still to considerate initial orientation
     @staticmethod
-    def show_visibility_graph_multiple_cars(my_car, other_cars, buildings):
+    def show_visibility_graph_multiple_cars(my_car, other_cars, array_obs , buildings):
         # Your vehicle's position
         my_car_pos = Point(my_car.lat, my_car.long)
 
@@ -146,11 +146,24 @@ class Util_visibility():
 
             # Display the other vehicle's point with legend
             plt.scatter(*other_car_pos.coords.xy, label=f'Car {other_car.ID}', s=50, zorder=2)
+            
 
             # Display the LineString between the points
-            line = LineString([my_car_pos, other_car_pos])
-            x, y = line.xy
-            plt.plot(x, y, linestyle='--', zorder=1)
+
+            plt.plot(other_car.lat, other_car.long)
+            
+        for i, obs in enumerate(array_obs):
+            # Other vehicle's position
+            obs_pos = Point(obs.lat, obs.long)
+
+        
+            # Display the LineString between the points
+            if (Util_visibility.is_visible(my_car_pos,obs_pos,buildings)):
+                line = LineString([my_car_pos, obs_pos])
+                x, y = line.xy
+                plt.plot(x, y, linestyle='--', zorder=0.5)
+            plt.scatter(obs.lat, obs.long, marker='x', s=50, zorder=2)
+            
 
         # Graph configuration
         plt.legend()

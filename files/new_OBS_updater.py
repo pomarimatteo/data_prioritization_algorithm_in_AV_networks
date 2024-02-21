@@ -10,7 +10,7 @@ from utility import Utility as util
 from util_visibility import Util_visibility as util_vsb
 
 class New_OBS_updater:
-    range_obs = 100 # 100 meters
+    range_obs = 50 # 50 meters
     
 
     def __init__(self, my_car_map, obs):
@@ -39,12 +39,14 @@ class New_OBS_updater:
 
         return dist_in_meters
     
-    def calculate_priority(self):
+    def calculate_priority(self, sender_car, receiver_car, obs):
         #return New_OBS_updater.calculate_distance()
         #Conditional_VOI = CV()
         #Conditional_VOIcalculate_importance_value(self, values):
         
-        return
+        
+        
+        return 1
     
     def check_in_range(self):
         if (util.check_in_range(self.my_car_map, self.obs)):

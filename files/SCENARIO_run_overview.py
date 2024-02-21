@@ -10,6 +10,8 @@ from SCENARIO_method import Simulated_Scenario
 from AHP import AHP
 from AHP_conditional_VOI import Conditional_VOI
 from AHP_functions import Functions
+import seaborn as sns
+import numpy as np
 
 from shapely.geometry import Polygon
 import matplotlib.pyplot as plt
@@ -25,7 +27,6 @@ import geopandas as gpd
 class SCENARIO_run_overview:
     
     # **************************************************** #
-     
      # 1) generate n random AVs
      
      # 2) generate m random obstacles
@@ -37,7 +38,6 @@ class SCENARIO_run_overview:
      # 5) implement consideration and AHP for prioritarization of the data
      
      # 6) evaluate the new communication
-     
     # **************************************************** #
 
     '''
@@ -46,8 +46,18 @@ class SCENARIO_run_overview:
     * valuta di inserirli all'interno dei simulate_communication
     '''
     
-    '''
     # SCENARIO 1
+    geojson_path = 'data/geojson/'
+    
+    
+    # Inizializza i dataframe per i dati di ogni simulazione
+    broadcast_data = pd.DataFrame(columns=['total_messages_sent', 'average_dist', 'redundancy_count', 'redundancy_perc'])
+    naive_data = pd.DataFrame(columns=['total_messages_sent', 'average_dist', 'redundancy_count', 'redundancy_perc'])
+    optimized_data = pd.DataFrame(columns=['total_messages_sent', 'average_dist', 'redundancy_count', 'redundancy_perc'])
+    
+    intersection = gpd.read_file(geojson_path + 'map_001.geojson')
+    road = gpd.read_file(geojson_path + 'road.geojson')
+
     polygon_spawn = [
         [11.0069841, 45.4395318],
         [11.0069716, 45.4394266],
@@ -58,139 +68,203 @@ class SCENARIO_run_overview:
         [11.0086243, 45.4395781],
         [11.0085992, 45.4396572]
     ]
+    
     car_data = [
         ('A', 11.007767285707814, 45.439492436628484, 90),
         ('B', 11.007789421555742, 45.43937903284822, 90),
         ('C', 11.007903263242582, 45.439586043947855, 180),
-        ('D', 11.007484262837124, 45.43954676351245, 0.1),
-        ('E', 11.008225211533869, 45.43960992760452, 180),
-        ('F', 11.007983298078727, 45.439737059970014, 270)
+        #('D', 11.007484262837124, 45.43954676351245, 0.1),
+        #('E', 11.008225211533869, 45.43960992760452, 180),
+        #('F', 11.007983298078727, 45.439737059970014, 270)
     ]
-    n_obs = 4
-    intersection = gpd.read_file('data/geojson/map_001.geojson')
-    road = gpd.read_file('data/geojson/road.geojson')
+   
+   
+    #n_obs_intervals = [(0, 10), (10, 20), (20, 30)]
 
-    scenario_1 = Simulated_Scenario(polygon_spawn, car_data, n_obs, intersection, road)
+    #for n_obs_interval in n_obs_intervals:
+        # Esegui il loop per ogni intervallo
+    for i in range(1):   
+        print(i)  
+
+        
+        n_car = random.randint(1, 15)
+        n_car = 5
+        n_obs = random.randint(10, 12)
+        
+        n_obs = 15
+        
+        array_AVs = Simulated_Scenario.generate_AVs(n_car, polygon_spawn)
+        obs_array = Simulated_Scenario.generate_obstacles(n_obs, polygon_spawn)
+        
+        scenario = Simulated_Scenario(car_data, obs_array, intersection, road)
+        #scenario = Simulated_Scenario(array_AVs, obs_array, intersection, road)
+                
+        scenario.process_all_AVs()
+        scenario.process_all_obs()
+
+        
+        util_vsb.save_test(scenario.array_AVs,scenario.obs_array, scenario.intersection)
+        scenario.to_excel()
+        #util_vsb.show_visibility_graph_multiple_cars(scenario.array_AVs[0],scenario.array_AVs,scenario.obs_array, scenario.intersection)
+        
+        # Esegui le simulazioni
+        #broadcast_results = scenario.simulate_broadcast_communication()
+        #naive_results = scenario.simulate_naive_communication()
+        #optimized_results = scenario.optimized_method()
+        
+        scenario.metodo()
+        
+
+        # Aggiungi i risultati alle rispettive dataframe
+        #broadcast_data.loc[i] = broadcast_results
+        #naive_data.loc[i] = naive_results
+        #optimized_data.loc[i] = optimized_results
+    
+    
+    
+    #util
+    '''
+ 
+    # Salva i dataframe in file Excel
+    broadcast_data.to_excel("broadcast_results.xlsx", index=False)
+    naive_data.to_excel("naive_results.xlsx", index=False)
+    optimized_data.to_excel("optimized_results.xlsx", index=False)    
+
+    
+    # Calcolo delle medie per i messaggi totali inviati
+    broadcast_avg_total_messages = broadcast_data['total_messages_sent'].mean()
+    naive_avg_total_messages = naive_data['total_messages_sent'].mean()
+    optimized_avg_total_messages = optimized_data['total_messages_sent'].mean()
+    
+    # Calcolo delle medie per i messaggi di ridondanza
+    broadcast_avg_redundancy_count = broadcast_data['redundancy_count'].mean()
+    print('broadcast_avg_redundancy_count',broadcast_avg_redundancy_count)
+    naive_avg_redundancy_count = naive_data['redundancy_count'].mean()
+    optimized_avg_redundancy_count = optimized_data['redundancy_count'].mean()
+    
+    # Calcolo delle medie per i messaggi di ridondanza
+    broadcast_average_dist = broadcast_data['average_dist'].mean()
+    naive_avg_average_dist = naive_data['average_dist'].mean()
+    optimized_average_distt = optimized_data['average_dist'].mean()
+    
+    # Calcolo delle medie per i messaggi di ridondanza
+    broadcast_avg_redundancy_perc = broadcast_data['redundancy_perc'].mean()
+    naive_avg_redundancy_perc = naive_data['redundancy_perc'].mean()
+    optimized_avg_redundancy_perc = optimized_data['redundancy_perc'].mean()
+    
+    # Dati dei messaggi totali inviati
+    labels = ['Broadcast', 'Naive', 'Optimized']
+    avg_total_messages = [broadcast_avg_total_messages, naive_avg_total_messages, optimized_avg_total_messages]
+
+    # Dati della distanza media
+    avg_distance = [broadcast_average_dist, naive_avg_average_dist, optimized_average_distt]
+    
+    avg_redundancy = [broadcast_avg_redundancy_count, naive_avg_redundancy_count,optimized_avg_redundancy_count]
+    
+    # Dati della distanza media
+    avg_distance = [broadcast_average_dist, naive_avg_average_dist, optimized_average_distt]
+
+
+    labels = ['Broadcast', 'Naive', 'Optimized']
+
+    
+
+
+    # Plot
+    fig, ax1= plt.subplots()
+
+    color = 'grey'  # Colori modificati
+    ax1.set_xlabel('Communication Type')
+    ax1.set_ylabel('Average Total Messages Sent')
+    ax1.bar(labels, avg_total_messages, color=color, width=0.45)  # Larghezza delle barre modificata
+    ax1.tick_params(axis='y', labelcolor=color)
+
+    ax2 = ax1.twinx()
+    color = 'tab:orange'  # Colori modificati
+    ax2.set_ylabel('Average Distance')
+    ax2.plot(labels, avg_distance, color=color,linestyle='--', marker='o')
+    ax2.tick_params(axis='y', labelcolor=color)
+    
+    # Sovrapposizione dei dati sulla ridondanza
+    #ax3 = ax1.twinx()
+    
+    hatch_pattern = '///'
+    color = 'red'
+    #ax3.set_ylabel('Average Redundancy Count', color=color)
+    ax1.bar(labels, avg_redundancy, color=color, width=0.45, hatch=hatch_pattern, alpha=1)  # Larghezza delle barre modificata
+    ax1.tick_params(axis='y', labelcolor=color)
+
+    
+
+
+    max_y = max(avg_distance)
+    ax2.set_ylim(0, max_y * 3/2)  
+    
+    # Personalizzazione degli spazi tra le tick sull'asse x
+    ax1.set_xticks(np.arange(len(labels)))
+    ax1.set_xticklabels(labels)
+    
+    
+    fig.tight_layout()
+    plt.title('Average Total Messages Sent vs Average Distance vs Average Redundancy Count')
+    plt.show()
+    
     '''
     
-    scenario_1 = Simulated_Scenario()
-    scenario_1.process_all_AVs()
-    scenario_1.process_all_obs()
-    #util_vsb.save_test(scenario_1.array_AVs,scenario_1.obs_array, scenario_1.intersection)
-    scenario_1.to_excel()
     
-    scenario_1.simulate_broadcast_communication()
-    scenario_1.simulate_naive_communication()
-    #scenario_1.simulate_optimized_communication()
     
-    scenario_1.optimized_method()
+    
+    
+    
     
     '''
-    b = []
-    n = []
-    o = []
+    # Dati per i tipi di comunicazione
+    communication_methods = ['Broadcast', 'Naive', 'Optimized']
 
-    for i in range(20):
-        scenario_1 = Simulated_Scenario()
-        scenario_1.process_all_AVs()
-        scenario_1.process_all_obs()
-        
-        result_b = scenario_1.simulate_broadcast_communication()
-        b.append(result_b)
-        
-        result_n = scenario_1.simulate_naive_communication()
-        n.append(result_n)
-        
-        result_o = scenario_1.simulate_optimized_communication()
-        o.append(result_o)
+    # Medie dei messaggi totali inviati
+    total_messages_avg = [broadcast_avg_total_messages, naive_avg_total_messages, optimized_avg_total_messages]
 
-    # Organizzazione dei dati in una lista di dizionari per b
-    data_rows_b = []
-    for result in b:
-        data_rows_b.append({
-            "total_messages_sent": result["total_messages_sent"],
-            "average_dist": result["average_dist"],
-            "redundancy_count": result["redundancy_count"],
-            "redundancy_perc": result["redundancy_perc"]
-        })
 
-    # Creazione del DataFrame pandas per b
-    df_b = pd.DataFrame(data_rows_b)
+    
+    plt.figure(figsize=(10, 6))
+    plt.bar(communication_methods, total_messages_avg, color=['orange', 'grey', 'green'])
+    plt.title('Media dei messaggi totali inviati per tipo di comunicazione')
+    plt.xlabel('Tipo di comunicazione')
+    plt.ylabel('Media dei messaggi totali inviati')
+    plt.show()
 
-    # Salvataggio su Excel per b
-    df_b.to_excel("data/_broadcast_simulation.xlsx", index=False)
 
-    # Organizzazione dei dati in una lista di dizionari per n
-    data_rows_n = []
-    for result in n:
-        data_rows_n.append({
-            "total_messages_sent": result["total_messages_sent"],
-            "average_dist": result["average_dist"],
-            "redundancy_count": result["redundancy_count"],
-            "redundancy_perc": result["redundancy_perc"]
-        })
-
-    # Creazione del DataFrame pandas per n
-    df_n = pd.DataFrame(data_rows_n)
-
-    # Salvataggio su Excel per n
-    df_n.to_excel("data/_naive_simulation.xlsx", index=False)
-
-    # Organizzazione dei dati in una lista di dizionari per o
-    data_rows_o = []
-    for result in o:
-        data_rows_o.append({
-            "total_messages_sent": result["total_messages_sent"],
-            "average_dist": result["average_dist"],
-            "redundancy_count": result["redundancy_count"],
-            "redundancy_perc": result["redundancy_perc"]
-        })
-
-    # Creazione del DataFrame pandas per o
-    df_o = pd.DataFrame(data_rows_o)
-
-    # Salvataggio su Excel per o
-    df_o.to_excel("data/_optimized_simulation.xlsx", index=False)
 
 
 
     
-    
-    #scenario_1.save_data_simulation()
+    # Medie per i messaggi di ridondanza
+    redundancy_count_avg = [broadcast_avg_redundancy_count, naive_avg_redundancy_count, optimized_avg_redundancy_count]
 
-    
-    
-    #scenario_1.plot_communication_stats('data/content_communication_broadcast.xlsx', 'data/content_communication_naive.xlsx', 'data/content_communication_mex_counts_optimize.xlsx')
-    
-    #scenario_1.find_min_distance_directions()
-    #scenario_1.find_min_distance_and_construct_obstacle_dictionary()
+    plt.figure(figsize=(10, 6))
+    plt.bar(communication_methods, redundancy_count_avg, color=['blue', 'green', 'red'])
+    plt.title('Media dei messaggi di ridondanza per tipo di comunicazione')
+    plt.xlabel('Tipo di comunicazione')
+    plt.ylabel('Media dei messaggi di ridondanza')
+    plt.show()
 
+    # Medie per la distanza media dei messaggi
+    average_dist_avg = [broadcast_average_dist, naive_avg_average_dist, optimized_average_distt]
 
-    #scenario_1.evaluate_obstacles_visibility_dir()
-    
-        
-    # scenario_1.to_excel_with_messages()
-    # scenario_1.to_excel_with_single_messages()
-    
-    '''
-    
-    '''
-    
-    scenario_1.evaluate_obstacles_visibility()
-        
-    scenario_1.print_tabular_table()
-    
-    print('\nevaluate_obstacles_visibility\n')
-    scenario_1.evaluate_obstacles_visibility()
-    scenario_1.evaluate_obstacles_visibility_plot()
-    print('\nevaluate_obstacles_visibility_dir\n')
-    scenario_1.evaluate_obstacles_visibility_dir()
-    scenario_1.print_obstacles_visibility_info()
-    #scenario_1.plot_obstacles_visibility_heatmap()
-    
-    scenario_1.simulate_communication_uni()
+    plt.figure(figsize=(10, 6))
+    plt.bar(communication_methods, average_dist_avg, color=['blue', 'green', 'red'])
+    plt.title('Media della distanza media dei messaggi per tipo di comunicazione')
+    plt.xlabel('Tipo di comunicazione')
+    plt.ylabel('Media della distanza media dei messaggi')
+    plt.show()
 
+    # Medie per la percentuale di ridondanza dei messaggi
+    redundancy_perc_avg = [broadcast_avg_redundancy_perc, naive_avg_redundancy_perc, optimized_avg_redundancy_perc]
 
-    #scenario_1.voi()
-    Functions.save_all_plots()
+    plt.figure(figsize=(10, 6))
+    plt.bar(communication_methods, redundancy_perc_avg, color=['blue', 'green', 'red'])
+    plt.title('Media della percentuale di ridondanza dei messaggi per tipo di comunicazione')
+    plt.xlabel('Tipo di comunicazione')
+    plt.ylabel('Media della percentuale di ridondanza dei messaggi')
+    plt.show()
     '''
