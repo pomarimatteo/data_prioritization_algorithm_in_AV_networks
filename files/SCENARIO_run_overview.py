@@ -11,6 +11,7 @@ from AHP import AHP
 from AHP_conditional_VOI import Conditional_VOI
 from AHP_functions import Functions
 import seaborn as sns
+import math
 import numpy as np
 
 from shapely.geometry import Polygon
@@ -54,7 +55,7 @@ class SCENARIO_run_overview:
     broadcast_data = pd.DataFrame(columns=['total_messages_sent', 'average_dist', 'redundancy_count', 'redundancy_perc'])
     naive_data = pd.DataFrame(columns=['total_messages_sent', 'average_dist', 'redundancy_count', 'redundancy_perc'])
     optimized_data = pd.DataFrame(columns=['total_messages_sent', 'average_dist', 'redundancy_count', 'redundancy_perc'])
-    
+     
     intersection = gpd.read_file(geojson_path + 'map_001.geojson')
     road = gpd.read_file(geojson_path + 'road.geojson')
 
@@ -73,9 +74,23 @@ class SCENARIO_run_overview:
         ('A', 11.007767285707814, 45.439492436628484, 90),
         ('B', 11.007789421555742, 45.43937903284822, 90),
         ('C', 11.007903263242582, 45.439586043947855, 180),
-        #('D', 11.007484262837124, 45.43954676351245, 0.1),
-        #('E', 11.008225211533869, 45.43960992760452, 180),
-        #('F', 11.007983298078727, 45.439737059970014, 270)
+        ('D', 11.007484262837124, 45.43954676351245, 0.1),
+        ('E', 11.008225211533869, 45.43960992760452, 180),
+        ('F', 11.007983298078727, 45.439737059970014, 270)
+    ]
+    
+    obs_data = [
+        ('obs01', 11.007994965432141, 45.43956251307974),
+        ('obs02', 11.007259879567288, 45.439501301102375),
+        ('obs03', 11.007524314620381, 45.43957334519733),
+        ('obs04', 11.00811932397948, 45.43955290255859),
+        ('obs05', 11.007794071474587, 45.43945523711499),
+        ('obs06', 11.008327864869, 45.43958895589447),
+        ('obs07', 11.007239494837371, 45.43954782572268),
+        ('obs08', 11.007182339769145, 45.439518758415836),
+        ('obs09', 11.007204585265388, 45.43954086015715),
+        ('obs10', 11.007758, 45.439571),
+        #('obs11', 11.007759, 45.439571)
     ]
    
    
@@ -89,42 +104,48 @@ class SCENARIO_run_overview:
         
         n_car = random.randint(1, 15)
         n_car = 5
-        n_obs = random.randint(10, 12)
+        # n_obs = random.randint(10, 12)
         
-        n_obs = 15
+        n_obs = 9
         
         array_AVs = Simulated_Scenario.generate_AVs(n_car, polygon_spawn)
         obs_array = Simulated_Scenario.generate_obstacles(n_obs, polygon_spawn)
         
-        scenario = Simulated_Scenario(car_data, obs_array, intersection, road)
+        scenario = Simulated_Scenario(car_data, obs_data, intersection, road)
         #scenario = Simulated_Scenario(array_AVs, obs_array, intersection, road)
                 
         scenario.process_all_AVs()
         scenario.process_all_obs()
 
         
-        util_vsb.save_test(scenario.array_AVs,scenario.obs_array, scenario.intersection)
+        #util_vsb.save_test(scenario.array_AVs,scenario.obs_array, scenario.intersection)
         scenario.to_excel()
         #util_vsb.show_visibility_graph_multiple_cars(scenario.array_AVs[0],scenario.array_AVs,scenario.obs_array, scenario.intersection)
         
         # Esegui le simulazioni
-        #broadcast_results = scenario.simulate_broadcast_communication()
-        #naive_results = scenario.simulate_naive_communication()
-        #optimized_results = scenario.optimized_method()
+        broadcast_results = scenario.simulate_broadcast_communication()
+        naive_results = scenario.simulate_naive_communication()
+        optimized_results = scenario.optimized_method()
         
-        scenario.metodo()
+        #scenario.optimized_method()
         
-
+        #scenario.optimized_method()
+        
+        
+        
+        
+        
+        #scenario.plot_exponential(0.2,10)
         # Aggiungi i risultati alle rispettive dataframe
         #broadcast_data.loc[i] = broadcast_results
         #naive_data.loc[i] = naive_results
         #optimized_data.loc[i] = optimized_results
     
     
-    
+
     #util
     '''
- 
+    
     # Salva i dataframe in file Excel
     broadcast_data.to_excel("broadcast_results.xlsx", index=False)
     naive_data.to_excel("naive_results.xlsx", index=False)
@@ -209,8 +230,8 @@ class SCENARIO_run_overview:
     plt.title('Average Total Messages Sent vs Average Distance vs Average Redundancy Count')
     plt.show()
     
-    '''
     
+    '''
     
     
     

@@ -46,7 +46,7 @@ class AHP_score():
         ('distance_R', 'distance_R'): 1,
         
     }
-    
+    '''
     ahp_calculator = AHP(matrix)
 
     
@@ -61,3 +61,4 @@ class AHP_score():
     values = [5,5,5]
     print('cond',conditional_VOI.calculate_importance_value(values))
     
+    '''

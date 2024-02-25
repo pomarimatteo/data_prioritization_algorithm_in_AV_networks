@@ -11,6 +11,9 @@ class Map:
 
         self.buildings = buildings
         self.roads = roads
+        self.range = self.find_range_plot()
+        
+        #self.show()
 
 
     # find range for the plot based on buildings coordinates of the geojson file
@@ -37,17 +40,17 @@ class Map:
         fig, ax = plt.subplots()
 
         # plot streets
-        for street in self.map.roads['geometry']:
+        for street in self.roads['geometry']:
             x, y = street.coords.xy
             ax.plot(x, y, linewidth=15, color="grey")
 
         # plot buildings
-        for building in self.map.buildings['geometry']:
+        for building in self.buildings['geometry']:
             ax.plot(*building.exterior.xy, color='green')
 
         # extract boundaries
-        xlim = [self.map.range[0][0], self.map.range[0][1]]
-        ylim = [self.map.range[1][0], self.map.range[1][1]]
+        xlim = [self.range[0][0], self.range[0][1]]
+        ylim = [self.range[1][0], self.range[1][1]]
 
         plt.xlim(xlim)
         plt.ylim(ylim)

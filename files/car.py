@@ -108,8 +108,6 @@ class Car:
         return direction_importance
     
     
-    
-    
     def print_car_info(self):
         car_ids = [car.ID for car in self.cars_in_range]
         north_ids = [car.ID for car in self.visible_north]
