@@ -114,3 +114,4 @@ Functions.plot_roi_function()
 Functions.plot_proximity_relation_strength(25,0.5)
 Functions.plot_n_obstacles_function(5,25)
 '''
+#Functions.plot_n_obstacles_function(5,25)

@@ -1,40 +1,36 @@
 import matplotlib.pyplot as plt
+from matplotlib.patches import Polygon
 
-# Valori dei dati
-situations = ['Broadcast', 'Naive', 'Optimized']
-total_messages = [120, 37, 17]
-average_value = [17.54, 22.42, 22.89]
-redundancy_count = [106, 18, 2.0]
-redundancy_percentage = [88.33, 48.65, 11.76]
+polygon_spawn = [
+    [11.093765, 45.604405],
+    [11.093987, 45.604389],
+    [11.094671, 45.604102],
+    [11.094742, 45.604567],
+    [11.095167, 45.604233],
+    [11.095650, 45.604669],
+    [11.095817, 45.604554],
+    [11.095370, 45.604253],
+    [11.094987, 45.603848],
+    [11.095089, 45.603726],
+    [11.095666, 45.603345],
+    [11.095423, 45.603194],
+    [11.094762, 45.603937]
+]
 
-# Creazione del plot per i Total Messages
-plt.figure(figsize=(10, 6))
-plt.bar(situations, total_messages, color='blue')
-plt.title('Total Messages')
-plt.xlabel('Simulation Type')
-plt.ylabel('Total Messages')
+# Estrai le coordinate x e y
+x = [point[0] for point in polygon_spawn]
+y = [point[1] for point in polygon_spawn]
+
+# Aggiungi il primo punto alla fine per chiudere il poligono
+x.append(x[0])
+y.append(y[0])
+
+# Plot del poligono
+plt.figure()
+plt.plot(x, y, marker='o')
+plt.gca().set_aspect('equal', adjustable='box')
+plt.xlabel('Longitude')
+plt.ylabel('Latitude')
+plt.title('Poligono generato dai punti forniti')
 plt.grid(True)
 plt.show()
-
-# Creazione del plot per l'Average Value
-plt.figure(figsize=(10, 6))
-plt.plot(situations, average_value, marker='o', color='green')
-plt.title('Average Value')
-plt.xlabel('Simulation Type')
-plt.ylabel('Average Value')
-plt.grid(True)
-plt.show()
-
-# Creazione del plot per la Redundancy Count
-plt.figure(figsize=(10, 6))
-plt.plot(situations, redundancy_count, marker='s', color='red')
-plt.title('Redundancy Count')
-plt.xlabel('Simulation Type')
-plt.ylabel('Redundancy Count')
-plt.grid(True)
-plt.show()
-
-# Creazione del plot per la Redundancy Percentage
-plt.figure(figsize=(10, 6))
-plt.plot(situations, redundancy_percentage, marker='^', color='orange')
-plt.tit
