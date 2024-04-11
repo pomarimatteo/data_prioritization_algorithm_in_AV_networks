@@ -13,7 +13,7 @@ from AHP_functions import Functions
 import seaborn as sns
 import math
 import numpy as np
-from tqdm import tqdm  #
+from tqdm import tqdm  
 
 
 from shapely.geometry import Polygon
@@ -51,13 +51,17 @@ class SCENARIO_run_overview:
     naive_data = pd.DataFrame(columns=['total_messages_sent', 'average_dist', 'redundancy_count', 'redundancy_perc'])
     optimized_data = pd.DataFrame(columns=['total_messages_sent', 'average_dist', 'redundancy_count', 'redundancy_perc'])
      
-    intersection = gpd.read_file(geojson_path + 'map_001.geojson')
-    road = gpd.read_file(geojson_path + 'road.geojson')
+    # intersection = gpd.read_file(geojson_path + 'map_001.geojson')
+    # road = gpd.read_file(geojson_path + 'road.geojson')
+    
+    intersection = gpd.read_file(geojson_path + 'map_003.geojson')
+    road = gpd.read_file(geojson_path + 'road_003.geojson')
     
     n_car = 5
     #intersection = gpd.read_file(geojson_path + 'map_003.geojson')
     #road = gpd.read_file(geojson_path + 'road_003.geojson')
     
+    '''
     #urban
     polygon_spawn = [
         [11.0069841, 45.4395318],
@@ -69,6 +73,7 @@ class SCENARIO_run_overview:
         [11.0086243, 45.4395781],
         [11.0085992, 45.4396572]
     ]
+    '''
     ''' 
     # milano
     polygon_spawn = [
@@ -85,7 +90,8 @@ class SCENARIO_run_overview:
         [9.10402, 45.439824],
         [9.105021, 45.438231]
     ]
-     
+    
+    '''
     #velo
     polygon_spawn = [
     [11.093765, 45.604405],
@@ -102,7 +108,7 @@ class SCENARIO_run_overview:
     [11.095423, 45.603194],
     [11.094762, 45.603937]
     ]
-    '''
+    
    
     
     car_data = [
@@ -128,7 +134,7 @@ class SCENARIO_run_overview:
         #('obs11', 11.007759, 45.439571)
     ]
     
-    n_obs_values = [10, 15, 20, 25, 30, 35, 40]
+    n_obs_values = [10, 15, 20,25,30]
 
     # Liste per i total messages e percentuale di ridondanza per ogni metodo
     total_messages_broadcast = []
@@ -137,6 +143,9 @@ class SCENARIO_run_overview:
     redundancy_percentage_broadcast = []
     redundancy_percentage_naive = []
     redundancy_percentage_optimized = []
+    average_distance_broadcast = []
+    average_distance_naive = []
+    average_distance_optimized = []
 
     # Calcola i total messages per ogni valore di n_obs e metodo
     for n_obs in n_obs_values:
@@ -145,7 +154,8 @@ class SCENARIO_run_overview:
         naive_data = pd.DataFrame(columns=['total_messages_sent', 'average_dist', 'redundancy_count', 'redundancy_perc'])
         optimized_data = pd.DataFrame(columns=['total_messages_sent', 'average_dist', 'redundancy_count', 'redundancy_perc'])
         
-        for i in tqdm(range(340), desc=f"Simulazione per n_obs = {n_obs}"):
+        #######!
+        for i in tqdm(range(500), desc=f"Simulazione per n_obs = {n_obs}"):
             array_AVs = Simulated_Scenario.generate_AVs(n_car, polygon_spawn)
             obs_array = Simulated_Scenario.generate_obstacles(n_obs, polygon_spawn)
             
@@ -169,6 +179,16 @@ class SCENARIO_run_overview:
         redundancy_percentage_broadcast.append(broadcast_data['redundancy_perc'].mean())
         redundancy_percentage_naive.append(naive_data['redundancy_perc'].mean())
         redundancy_percentage_optimized.append(optimized_data['redundancy_perc'].mean())
+        
+        # Calcola la media dell'average distance per ogni metodo
+        average_distance_broadcast.append(broadcast_data['average_dist'].mean())
+        average_distance_naive.append(naive_data['average_dist'].mean())
+        average_distance_optimized.append(optimized_data['average_dist'].mean())
+
+        
+
+        
+        
 
    
     # Plot delle linee tratteggiate per la percentuale di ridondanza
@@ -182,16 +202,41 @@ class SCENARIO_run_overview:
     plt.bar(n_obs_values, total_messages_naive, width=bar_width, color='#22a7f0', alpha=0.7, label='Naive mex sent')  # Blu chiaro
     plt.bar(np.array(n_obs_values) + bar_width, total_messages_optimized, width=bar_width, color='#76c68f', alpha=0.7, label='Optimized mex sent')  # Verde
 
-    plt.xlabel('Number of Obstacles (n_obs)')
-    plt.ylabel('Values')
-    plt.title('Redundancy Percentage vs Number of Obstacles')
+    plt.xlabel('Number of Obstacles (n_obs)',fontsize=22)
+    plt.ylabel('Values',fontsize=22)
+    plt.title('Redundancy Percentage vs Number of Obstacles',fontsize=22)
 
     # Aggiungi le etichette per la percentuale di ridondanza in alto a sinistra del punto corrispondente
     offset = 0.5  # Offset verticale per i punti della ridondanza
     for x, y_broadcast, y_naive, y_optimized in zip(n_obs_values, redundancy_percentage_broadcast, redundancy_percentage_naive, redundancy_percentage_optimized):
-        plt.text(x, y_broadcast + offset, f'{y_broadcast:.2f}%', fontsize=8, ha='left', va='bottom', color='black', alpha=0.8)
-        plt.text(x, y_naive + offset, f'{y_naive:.2f}%', fontsize=8, ha='left', va='bottom', color='black', alpha=0.8)
-        plt.text(x, y_optimized + offset, f'{y_optimized:.2f}%', fontsize=8, ha='left', va='bottom', color='black', alpha=0.8)
+        plt.text(x, y_broadcast + offset, f'{y_broadcast:.2f}%', fontsize=16, ha='left', va='bottom', color='black', alpha=0.8)
+        plt.text(x, y_naive + offset, f'{y_naive:.2f}%', fontsize=16, ha='left', va='bottom', color='black', alpha=0.8)
+        plt.text(x, y_optimized + offset, f'{y_optimized:.2f}%', fontsize=16, ha='left', va='bottom', color='black', alpha=0.8)
+
+    plt.xticks(n_obs_values)  # Imposta solo gli etichette desiderate sull'asse x
+    plt.grid(False)  # Rimuovi la griglia
+
+    # Posiziona la legenda fuori dal grafico
+    plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
+    plt.tick_params(axis='x', labelsize=18)
+    plt.tick_params(axis='y', labelsize=18)
+    plt.show()
+
+    print()
+    
+    
+    
+    # Plot dell'average distance
+    plt.figure()
+
+    # Plot delle linee tratteggiate per la media della distanza
+    plt.plot(n_obs_values, average_distance_broadcast, marker='o', linestyle='dashed', color='#991f17', label='Broadcast average distance')
+    plt.plot(n_obs_values, average_distance_naive, marker='o', linestyle='dashed', color='orange', label='Naive average distance')
+    plt.plot(n_obs_values, average_distance_optimized, marker='o', linestyle='dashed', color='lightcoral', label='Optimized average distance')
+
+    plt.xlabel('Number of Obstacles (n_obs)', fontsize=22)
+    plt.ylabel('Average Distance', fontsize=22)
+    plt.title('Average Distance vs Number of Obstacles', fontsize=22)
 
     plt.xticks(n_obs_values)  # Imposta solo gli etichette desiderate sull'asse x
     plt.grid(False)  # Rimuovi la griglia
@@ -201,11 +246,38 @@ class SCENARIO_run_overview:
 
     plt.show()
 
+    print()
+    
+    
+    
+    # Plot dell'average distance
+    plt.figure()
 
+    # Plot delle linee tratteggiate per la media della distanza
+    plt.plot(n_obs_values, average_distance_broadcast, marker='o', linestyle='dashed', color='#991f17', label='Broadcast average distance')
+    plt.plot(n_obs_values, average_distance_naive, marker='o', linestyle='dashed', color='orange', label='Naive average distance')
+    plt.plot(n_obs_values, average_distance_optimized, marker='o', linestyle='dashed', color='lightcoral', label='Optimized average distance')
+
+    plt.xlabel('Number of Obstacles (n_obs)', fontsize=22)
+    plt.ylabel('Average Distance', fontsize=22)
+    plt.title('Average Distance vs Number of Obstacles', fontsize=22)
+
+    plt.xticks(n_obs_values)  # Imposta solo gli etichette desiderate sull'asse x
+    plt.grid(False)  # Rimuovi la griglia
+
+    # Posiziona la legenda fuori dal grafico
+    plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
+    
+    plt.tick_params(axis='x', labelsize=18)
+    plt.tick_params(axis='y', labelsize=18)
+
+    plt.show()
+
+    print()
 
    
     '''
-    for i in range(1000):   
+    for i in range(1):   
         print(i)  
         
         
@@ -222,9 +294,6 @@ class SCENARIO_run_overview:
         scenario.process_all_obs()
 
         
-        
-
-
         #scenario = Simulated_Scenario(car_data, obs_data, intersection, road)
         
         scenario.process_all_AVs()
@@ -248,6 +317,8 @@ class SCENARIO_run_overview:
     #naive_data.to_excel("naive_results.xlsx", index=False)
     #optimized_data.to_excel("optimized_results.xlsx", index=False)   
     
+    '''
+     
      
     # means
     broadcast_avg_total_messages = broadcast_data['total_messages_sent'].mean()
@@ -289,33 +360,38 @@ class SCENARIO_run_overview:
     for label, avg in zip(labels, avg_redundancy):
         print(f"{label}: {avg}")
 
-    fig, ax1= plt.subplots()
+    fig, ax1 = plt.subplots()
 
     color = '#27aeef'  
     ax1.set_xlabel('Communication Type')
     ax1.set_ylabel('Average Total Messages Sent')
-    ax1.bar(labels, avg_total_messages, color=color, width=0.45)  
+    ax1.bar(labels, avg_total_messages, color=color, width=0.45, label='Average Total Messages Sent')  
     ax1.tick_params(axis='y', labelcolor=color)
 
     ax2 = ax1.twinx()
     color = 'black'  
     ax2.set_ylabel('Average Distance')
-    ax2.plot(labels, avg_distance, color=color, linestyle='--', marker='o')
+    ax2.plot(labels, avg_distance, color=color, linestyle='--', marker='o', label='Average Distance')
     ax2.tick_params(axis='y', labelcolor=color)
-    
-    hatch_pattern = '///'
     color = '#e14b31'
-    ax1.bar(labels, avg_redundancy, color=color, width=0.45, hatch=hatch_pattern, alpha=1)  
+    ax1.bar(labels, avg_redundancy, color=color, width=0.45, hatch=hatch_pattern, alpha=1, label='Average Redundancy Count')  
     ax1.tick_params(axis='y', labelcolor=color)
 
     max_y = max(avg_distance)
     ax2.set_ylim(0, max_y * 3/2)  
-    
+
     ax1.set_xticks(np.arange(len(labels)))
     ax1.set_xticklabels(labels)
+
+    # Adding legend
+    lines, labels = ax1.get_legend_handles_labels()
+    lines2, labels2 = ax2.get_legend_handles_labels()
+    ax2.legend(lines + lines2, labels + labels2, loc='upper right')
     
+    plt.tick_params(axis='x', labelsize=18)
+    plt.tick_params(axis='y', labelsize=18)
+
     fig.tight_layout()
     plt.title('Average Total Messages Sent vs Average Distance vs Average Redundancy Count')
     plt.show()
 
-'''

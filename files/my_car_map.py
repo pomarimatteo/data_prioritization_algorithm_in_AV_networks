@@ -19,6 +19,8 @@ class My_car_map:
         
         self.AV = []
         
+        #self.show()
+        
         #self.fig, self.ax = self.generate_intersection()
     
     
@@ -51,24 +53,32 @@ class My_car_map:
         ax.set_yticks([])
         ax.set_title("Intersection")
         ax.set_aspect('equal')
+        
 
+        ax.plot(11.09499171133189, 45.60434620845027, 'bo')
+        ax.plot(111.095053165378994, 45.60429631978803, 'ro')
+        
+
+        
+        '''
         # plot myself
         ax.plot(self.car.lat, self.car.long, 'bo')
         
         # plot cars_in_range
         for other_car in self.cars_in_range:
-            ax.plot(other_car.lat, other_car.long, 'ro')
+            ax.plot(other_car[0].lat, other_car[0].long, 'ro')
             
         #plot obstacles
         for obs in self.obs:
             ax.plot(obs.lat, obs.long, 'ro')
-        
+        '''
         
         return fig, ax
     
     def show(self):
         self.generate_intersection()
         plt.show()
+        
         
     def is_point_in_range(self, point):
         x, y = point.x, point.y

@@ -1,22 +1,37 @@
 '''
 # manages when a new AV is detected
 '''
-
+from OBS import Obstacle
 import matplotlib.pyplot as plt
 from shapely.geometry import Point, LineString
-
+import numpy as np
+import random
+import math
 
 from utility import Utility as util
 from util_visibility import Util_visibility as util_vsb
 
 class New_OBS_updater:
-    range_obs = 50 # 50 meters
+    range_obs = 100 # 50 meters
     
 
     def __init__(self, my_car_map, obs):
         self.my_car_map = my_car_map
+        #my_car_map.show()
         self.obs = obs
+
         self.car = self.my_car_map.get_car()
+        
+        
+        
+        #print(obs.lat,obs.long)
+        
+        #obs_n = self.add_noise_to_data()
+        
+        #print(obs_n.lat,obs_n.long)
+        #print('******')
+        
+
 
     # private
     def generate_map(self):
@@ -85,3 +100,70 @@ class New_OBS_updater:
                     elif camera == "West":
                         self.car.obstacle_west.append(tupla)
 
+    def add_gaussian_noise(self, mean=0, std_dev=0.001):
+        # Genera del rumore gaussiano per la latitudine e la longitudine
+        lat_noise = np.random.normal(mean, std_dev)
+        long_noise = np.random.normal(mean, std_dev)
+        
+        # Aggiunge il rumore ai valori esistenti
+        self.lat += lat_noise
+        self.long += long_noise
+        
+    def plot_gaussian_distribution(mean=0, std_dev=1, xmin=-5, xmax=5):
+        x = np.linspace(xmin, xmax, 1000)
+        y = (1 / (std_dev * np.sqrt(2 * np.pi))) * np.exp(-0.5 * ((x - mean) / std_dev) ** 2)
+        
+        plt.plot(x, y, label='Gaussian Distribution')
+        plt.title('Gaussian Distribution')
+        plt.xlabel('X')
+        plt.ylabel('Probability Density')
+        plt.legend()
+        plt.grid(True)
+        plt.show()
+       
+       
+       
+       
+    def move_point(self, angle, distance):
+        
+        coord = self.my_car_map.car.lat, self.my_car_map.car.long
+        
+
+        # Converti le coordinate da latitudine/longitudine a metri
+        lat, lon = coord
+        lat_meters_per_degree = 111000
+        lon_meters_per_degree = 111000 * np.cos(np.radians(lat))
+        
+        # Calcola lo spostamento in metri
+        delta_lat = np.sin(np.radians(angle)) * distance / lat_meters_per_degree
+        delta_lon = np.cos(np.radians(angle)) * distance / lon_meters_per_degree
+        
+        # Applica lo spostamento alle coordinate
+        new_lat = lat + delta_lat
+        new_lon = lon + delta_lon
+        return new_lat, new_lon
+
+    def add_noise_to_data(self):
+
+        name = self.obs.ID
+        lat, lon = self.obs.lat, self.obs.long
+            
+        noisy_lat, noisy_lon = self.move_point(random.randint(0, 360), 0.1e-12)
+            
+        noisy_obs = Obstacle(name, noisy_lat, noisy_lon)
+        
+        return noisy_obs  
+       
+       
+       
+    ''' 
+    #plot_gaussian_distribution()
+    
+    obst=Obstacle('obs01', 11.007994965432141, 45.43956251307974)
+    
+    print("Coordinate iniziali:", obst.lat, obst.long)
+    
+    # Aggiunta di rumore gaussiano alle coordinate
+    add_gaussian_noise(lat_std_dev=0.001, long_std_dev=0.001)
+    print("Coordinate con rumore gaussiano:", obst.lat, obst.long)
+    '''

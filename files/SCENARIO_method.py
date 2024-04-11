@@ -53,10 +53,7 @@ class Simulated_Scenario:
           self.array_AVs = array_AVs
           self.obs_array = obs_array
           
-          
-
-          
-
+     
           #self.array_AVs = array_AVs
           
           
@@ -70,8 +67,12 @@ class Simulated_Scenario:
      # **************************************************************************** #
      
      def VOI(self):
+          #a = 9 # ('roi', 'distance_S')
+          #b = 7  # ('roi', 'distance_R'): b,
+          #c = 1/3 # ('distance_S', 'distance_R'): c,
+          
           a = 9 # ('roi', 'distance_S')
-          b = 7 # ('roi', 'distance_R'): b,
+          b = 7  # ('roi', 'distance_R'): b,
           c = 1/3 # ('distance_S', 'distance_R'): c,
           
           matrix = {
@@ -714,6 +715,53 @@ class Simulated_Scenario:
                          
           return my_dict
      
+     
+          # this       
+     def determine_rank_(self, sender_car, receiver_car):
+          rank = {}
+          
+          for direction in ['north', 'south', 'east', 'west']:
+               value_VOI = [0, 0, 0]  # angle, dist_S, dist_R
+               quality_array = []
+
+               sender_direction_obs_ids = {obs.ID for obs, dist in getattr(sender_car, f'obstacle_{direction}')}
+               received_obs_ids = {obs.ID for obs, dist in receiver_car.visible_obs}
+               unique_obstacle_ids = sender_direction_obs_ids - received_obs_ids
+
+               unique_obstacles_tupla = [(obs, dist) for obs, dist in getattr(sender_car, f'obstacle_{direction}') if
+                                        obs.ID in unique_obstacle_ids]
+
+               # value for each obs for VOI
+               for obs, dist in unique_obstacles_tupla:
+                    roi = util.calculate_angle_opt(receiver_car, obs)
+                    dist_R = util.dist_car_obs(receiver_car, obs)
+
+                    value_VOI[0] = abs(roi)
+                    value_VOI[1] = dist
+                    value_VOI[2] = dist_R
+
+                    quality = self.AHP.calculate_importance_value(value_VOI)
+                    quality_array.append(quality)
+                
+                
+               # this     
+               value = np.mean(quality_array) * self.funzione_logistica_slow(len(quality_array))
+               
+               
+               rank[direction] = value
+
+          sorted_ranks = {k: v for k, v in sorted(rank.items(), key=lambda item: item[1], reverse=True)}
+          
+          return sorted_ranks
+
+
+     def funzione_logistica_slow(self,x):
+          return 0.8 * (1 / (1 + np.exp(-0.1 * (x - 20))))
+     
+     
+     def funzione_logistica_fast(self,x, k = 0.5, x0=0.5):
+          return 1 / (1 + np.exp(-k*(x - x0)))
+     
      # REDUNDANCY METHODS
      # **************************************************************************** #
            
@@ -1166,39 +1214,6 @@ class Simulated_Scenario:
      ####################################################################################################
 
      
-     # this       
-     def determine_rank_(self, sender_car, receiver_car):
-          rank = {}
-          
-          for direction in ['north', 'south', 'east', 'west']:
-               value_VOI = [0, 0, 0]  # angle, dist_S, dist_R
-               quality_array = []
-
-               sender_direction_obs_ids = {obs.ID for obs, dist in getattr(sender_car, f'obstacle_{direction}')}
-               received_obs_ids = {obs.ID for obs, dist in receiver_car.visible_obs}
-               unique_obstacle_ids = sender_direction_obs_ids - received_obs_ids
-
-               unique_obstacles_tupla = [(obs, dist) for obs, dist in getattr(sender_car, f'obstacle_{direction}') if
-                                        obs.ID in unique_obstacle_ids]
-
-               # value for each obs for VOI
-               for obs, dist in unique_obstacles_tupla:
-                    roi = util.calculate_angle_opt(receiver_car, obs)
-                    dist_R = util.dist_car_obs(receiver_car, obs)
-
-                    value_VOI[0] = abs(roi)
-                    value_VOI[1] = dist
-                    value_VOI[2] = dist_R
-
-                    quality = self.AHP.calculate_importance_value(value_VOI)
-                    quality_array.append(quality)
-                    
-               value = sum(quality_array)
-               rank[direction] = value
-
-          sorted_ranks = {k: v for k, v in sorted(rank.items(), key=lambda item: item[1], reverse=True)}
-          
-          return sorted_ranks
 
      # this
      def met_(self):
