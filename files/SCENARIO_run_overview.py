@@ -155,7 +155,7 @@ class SCENARIO_run_overview:
         optimized_data = pd.DataFrame(columns=['total_messages_sent', 'average_dist', 'redundancy_count', 'redundancy_perc'])
         
         #######!
-        for i in tqdm(range(500), desc=f"Simulazione per n_obs = {n_obs}"):
+        for i in tqdm(range(200), desc=f"Simulazione per n_obs = {n_obs}"):
             array_AVs = Simulated_Scenario.generate_AVs(n_car, polygon_spawn)
             obs_array = Simulated_Scenario.generate_obstacles(n_obs, polygon_spawn)
             

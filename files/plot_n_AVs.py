@@ -51,8 +51,8 @@ class Class:
     naive_data = pd.DataFrame(columns=['total_messages_sent', 'average_dist', 'redundancy_count', 'redundancy_perc'])
     optimized_data = pd.DataFrame(columns=['total_messages_sent', 'average_dist', 'redundancy_count', 'redundancy_perc'])
      
-    intersection = gpd.read_file(geojson_path + 'map_001.geojson')
-    road = gpd.read_file(geojson_path + 'road.geojson')
+    intersection = gpd.read_file(geojson_path + 'map_003.geojson')
+    road = gpd.read_file(geojson_path + 'road_003.geojson')
     
     n_car = 5
     #intersection = gpd.read_file(geojson_path + 'map_003.geojson')
@@ -149,7 +149,7 @@ class Class:
         naive_data = pd.DataFrame(columns=['total_messages_sent', 'average_dist', 'redundancy_count', 'redundancy_perc'])
         optimized_data = pd.DataFrame(columns=['total_messages_sent', 'average_dist', 'redundancy_count', 'redundancy_perc'])
         
-        for i in tqdm(range(10), desc=f"Simulazione per n_cars = {n_cars}"):
+        for i in tqdm(range(200), desc=f"Simulazione per n_cars = {n_cars}"):
             array_AVs = Simulated_Scenario.generate_AVs(n_cars, polygon_spawn)
             obs_array = Simulated_Scenario.generate_obstacles(b_obs, polygon_spawn)
             

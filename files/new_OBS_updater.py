@@ -26,7 +26,7 @@ class New_OBS_updater:
         
         #print(obs.lat,obs.long)
         
-        #obs_n = self.add_noise_to_data()
+        obs_n = self.add_noise_to_data()
         
         #print(obs_n.lat,obs_n.long)
         #print('******')

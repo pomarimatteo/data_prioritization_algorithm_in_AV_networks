@@ -2,6 +2,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import math
 import os
+import tikzplotlib
+
 
 class Functions:
     
@@ -45,27 +47,34 @@ class Functions:
         x_values = np.linspace(0, 100, 1000)
         d1 = 80
         array_d0 = [array_d0]
-        plt.figure(figsize=(10, 6))
+        plt.figure(figsize=(20, 12))
 
         for d0 in array_d0:
             y_values = Functions.proximity_relation_strength_function(x_values, d0, k)
 
             plt.plot(x_values, y_values, label=f'Proximity Relation Strength Function (d0={d0}, k={k})', linewidth=2)
-            plt.axvline(x=d0, color='gray', linestyle='--', linewidth=0.8)
-            plt.axvline(x=d1, color='gray', linestyle='--', linewidth=0.8)
+            plt.axvline(x=d0, color='gray', linestyle='-', linewidth=0.8)
+            plt.axvline(x=d1, color='gray', linestyle='-', linewidth=0.8)
             plt.fill_betweenx(y_values, d0, d1, color='lightgray', alpha=0.5)
             plt.fill_betweenx(y_values, d1, 100, color='dimgray', alpha=0.5)
             plt.text((d0 + d1) / 2, 0.5, 'Ineffective', color='black', rotation=90, ha='center', va='center')
             plt.text(d1 + 10, 0.5, 'Out of range', color='black', rotation=90, ha='center', va='center')
 
-        plt.title('Proximity Relation Strength')
-        plt.xlabel('$x$')
-        plt.ylabel('$f(x)$')
+        plt.title('Proximity Relation Strength', fontsize=16)  # Modifica dimensione carattere titolo
+        plt.xlabel('$x$', fontsize=14)  # Modifica dimensione carattere asse x
+        plt.ylabel('$f(x)$', fontsize=14)  # Modifica dimensione carattere asse y
         plt.grid(False)
-        plt.legend(title='Legend', title_fontsize='14', loc='upper right')
+        plt.legend(title='Legend', title_fontsize='14', loc='upper right', fontsize=12)  # Modifica dimensione carattere legenda
         plt.xlim(0, 110)
         plt.ylim([0, 1])
+       
+        
+        tikzplotlib.save("plot.tikz")
+        
         plt.show()
+
+
+
 
     @staticmethod
     def plot_n_obstacles_function(k=0.5, n_max=25):
@@ -115,3 +124,6 @@ Functions.plot_proximity_relation_strength(25,0.5)
 Functions.plot_n_obstacles_function(5,25)
 '''
 #Functions.plot_n_obstacles_function(5,25)
+
+Functions.plot_proximity_relation_strength(25,0.5)
+
